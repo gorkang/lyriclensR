@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of lyriclensR is to test how to work with lyrics
+The goal of lyriclensR is to test how to work with song lyrics. This is a very experimental package. Most things should not work. Use at your own risk.  
 
 ## Installation
 

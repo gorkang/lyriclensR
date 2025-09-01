@@ -1,6 +1,15 @@
 # lyriclensR (development version)
 
-# lyriclensR 0.0.3.9000
+Major updates
+
+* Upload to Github processed lyrics (Spanish) ~ 9Mb
+
+Minor updates
+
+* 
+
+
+# lyriclensR 0.0.3
 
 Major updates
 
