@@ -2,6 +2,7 @@
 
 export(create_wordcloud)
 export(download_process_spotify_list)
+export(get_individual_songs)
 export(get_songs)
 export(process_html)
 export(search_words)

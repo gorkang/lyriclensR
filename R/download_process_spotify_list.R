@@ -13,14 +13,14 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
 
   # 1) Download Spotify website and process it
   cli::cli_h1("Downloading Spotify playlist")
-  OUT = download_and_process(WEB = spotify_list_URL)
+  OUT = get_and_process(WEB = spotify_list_URL)
 
 
   # 2) List not already downloaded artists
   cli::cli_h1("Filtering artists")
   LastFile = tibble::tibble(filename = list.files("outputs/DF/", full.names = TRUE)) |>
-    mutate(ctime = file.info(filename, extra_cols = TRUE)$ctime) |>
-    filter(ctime == max(ctime)) |> pull(filename)
+    dplyr::mutate(ctime = file.info(filename, extra_cols = TRUE)$ctime) |>
+    dplyr::filter(ctime == max(ctime)) |> dplyr::pull(filename)
 
   # LastFile = "outputs/DF/2025-07-30 15:44:50.544527 6UeSakyzhiEt4NB3UAd6NQ.csv"
 
@@ -32,7 +32,6 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
     # Download only artists not in outputs/lyrics
     Artistas_clean = list_not_downloaded_artists(input = LastFile)
   }
-
 
 
   # 3) Download all artists Lyrics

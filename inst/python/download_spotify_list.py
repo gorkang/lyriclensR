@@ -58,7 +58,7 @@ def createDriverInstance():
     return driver
 
 
-def download_spotify_list(WEB):
+def get_spotify_list(WEB):
   # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
 
   from selenium import webdriver

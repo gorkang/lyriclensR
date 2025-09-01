@@ -6,6 +6,13 @@
 devtools::load_all()
 
 
+
+# GET Top50 songs ---------------------------------------------------------
+
+Top50 = get_and_process(WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
+download_all_songs(Top50)
+
+
 # Process all lyrics ------------------------------------------------------
 
 lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)

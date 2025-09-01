@@ -7,4 +7,4 @@
 ^DEV$
 ^venv$
 ^README\.Rmd$
-^outputs\
+^outputs$

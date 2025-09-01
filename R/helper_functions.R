@@ -169,14 +169,42 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
 
 
 download_all_artists <- function(artists) {
+
   seq_along(artists) |>
     purrr::walk(~{
       cli::cli_alert_info("{.x}/{length(artists)}: {artists[.x]}")
       OUT = get_songs_safely(artists[.x])
-      Sys.sleep(runif(1, 10, 100))
+      Sys.sleep(runif(1, 10, 20))
       return(OUT)
     })
+
+  move_downloaded_lyrics()
+
 }
+
+
+  download_all_songs <- function(processed_spotify_list) {
+
+    DF_canciones = processed_spotify_list$DF_output
+
+    1:nrow(DF_canciones) |>
+      purrr::walk(~{
+
+        cli::cli_alert_info("{.x}/{nrow(DF_canciones)}: {DF_canciones$Cancion[.x]}")
+
+        OUT = get_individual_songs_safely(
+          name_artist = DF_canciones$Artista[.x],
+          name_song = DF_canciones$Cancion[.x]
+          )
+
+        Sys.sleep(runif(1, 5, 10))
+        return(OUT)
+      })
+
+    move_downloaded_lyrics()
+
+  }
+
 
 
 song_is_in_lyrics <- function(name_song) {
@@ -209,7 +237,17 @@ song_is_in_lyrics <- function(name_song) {
 move_downloaded_lyrics <- function() {
 
   downloaded = list.files(".", pattern = "json", full.names = TRUE)
-  destination = paste0("outputs/lyrics/", basename(downloaded))
+
+  NUM = stringr::str_count(downloaded, pattern = "_")
+
+  # 1 "_" is a full artist, 2 "_" is a specific song
+  if (all(NUM == 1)) {
+    destination = paste0("outputs/lyrics/", basename(downloaded))
+  } else if (all(NUM == 2)) {
+    destination = paste0("outputs/lyrics_individual_songs/", basename(downloaded))
+  } else {
+    cli::cli_abort("The number of '_' is not 1 or 2: {downloaded}")
+  }
 
   file.rename(from = downloaded, to = destination)
 
