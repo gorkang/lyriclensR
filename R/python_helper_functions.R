@@ -24,7 +24,8 @@ download_and_process <- function(WEB) {
   reticulate::source_python(system.file("python", "download_spotify_list.py", package = "lyriclensR"))
   download_spotify_list(WEB)
 
-  DF = lyriclensR:::process_html(WEB)
+  DF = process_html(WEB)
+
   return(DF)
 }
 

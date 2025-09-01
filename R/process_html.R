@@ -1,11 +1,18 @@
-process_html <- function(WEB) {
+#' process_html
+#'
+#' @param WEB URL for Spotify list
+#' @param DEBUG TRUE/FALSE, show songs in Console
+#'
+#' @returns A list with a DF and a vector of ARTISTS
+#' @export
+#'
+#' @examples process_html("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
+process_html <- function(WEB, DEBUG = FALSE) {
 
   # ERRORS:
   # Tyler, The Creator # Is an author. It gets changed to: c("Tyler", "The creator") # DICCIONARY with exceptions?
 
-
   part_URL = gsub("/en/|/", "_", gsub("https://open.spotify.com/playlist/", "", WEB))
-
 
   FILES = list.files("outputs/www/",
                      pattern = part_URL,
@@ -15,20 +22,22 @@ process_html <- function(WEB) {
   CAT = page_source_rvest |>
     rvest::html_elements(xpath = paste0('/html/body/div[4]/div/div[2]/div[6]/div/div[2]/div[1]/div/main/section/div[2]/div[3]/div/div[1]/div')) |>
     rvest::html_text2(preserve_nbsp = TRUE)
-  # cat(CAT)
 
   TXT = gsub("\\n[0-9]:[0-9]{2}\\n([0-9]{1,3})", "\n\n", CAT)
-  cat(TXT)
 
-  TEMPfile = tempfile()
-  TXT |> readr::write_lines(TEMPfile)
+  if (DEBUG) cat(TXT)
 
+  # OLD method
+  # TEMPfile = tempfile()
+  # TXT |> readr::write_lines(TEMPfile)
+  # XXX = readr::read_lines(TEMPfile, skip = 5) |>
 
-  XXX = readr::read_lines(TEMPfile, skip = 5) |> as_tibble() |>
-    mutate(line = 1:n())
+  DF_temp = readr::read_lines(TXT, skip = 5) |>
+    dplyr::as_tibble() |>
+    dplyr::mutate(line = 1:dplyr::n())
 
   DF_output =
-    XXX |>
+    DF_temp |>
     dplyr::mutate(X =
              # | line %in% c(1, 2)
                dplyr::case_when(
@@ -40,21 +49,17 @@ process_html <- function(WEB) {
              )) |>
     dplyr::filter(X != "") |>
     dplyr::select(-line) |>
-    dplyr::mutate(N = rep(1:(n()/3), each = 3)) |>
+    dplyr::mutate(N = rep(1:(dplyr::n()/3), each = 3)) |>
     tidyr::pivot_wider(names_from = X, values_from = value) |>
 
-    # In download_spotify_list, switching to Compact View is hard, because de Xpath changes often
-      # With this, we eliminate the E (Explicit) when the second letter is a capital letter or a number.
-      # REVIEW: This will probably fail in some cases
-    dplyr::mutate(Artista =
+    # We eliminate the E (Explicit) from Cancion
+    # REVIEW: This will probably fail in some cases, for example, songs that end with a capital E
+    dplyr::mutate(Cancion =
                     dplyr::case_when(
-                      grepl("^E[A-Z0-9].*", Artista) ~ gsub("E(.*)", "\\1", Artista),
-                      TRUE ~ Artista
+                      # grepl("^E[A-Z0-9].*", Cancion) ~ gsub("E(.*)", "\\1", Cancion),
+                      grepl("[A-Z0-9].*E$", Cancion) ~ gsub("(.*)E$", "\\1", Cancion, ignore.case = FALSE),
+                      TRUE ~ Cancion
                     ))
-      # select(Artista, Artista2) |>
-      # mutate(DIFF = Artista == Artista2) |> View()
-
-  # DF_output |> View()
 
   ARTISTAS = DF_output |>
     dplyr::select(Artista) |>
@@ -72,6 +77,11 @@ process_html <- function(WEB) {
   ALL_FILES = FILES_today[grepl(part_URL, FILES_today)]
   zip(paste0("outputs/zips/", Sys.Date(), part_URL, ".zip"), ALL_FILES)
   file.remove(ALL_FILES)
+
+  OUTPUT = list(
+    DF_output = DF_output,
+    ARTISTAS = ARTISTAS
+  )
 
   return(ARTISTAS)
 }

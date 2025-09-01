@@ -12,7 +12,6 @@
 
 import setuptools.dist
 import undetected_chromedriver as uc # the driver
-# from seleniumbase import Driver  # the driver
 from selenium.webdriver.common.by import By # to find various items on the page
 from selenium.webdriver.chrome.options import Options # to have devtools open
 import re
@@ -61,8 +60,7 @@ def createDriverInstance():
 
 def download_spotify_list(WEB):
   # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
-  # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF"
-  # WEB = "https://open.spotify.com/playlist/6UeSakyzhiEt4NB3UAd6NQ"
+
   from selenium import webdriver
   from selenium.common.exceptions import TimeoutException
   from selenium.webdriver.support.ui import WebDriverWait

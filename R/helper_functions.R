@@ -1,5 +1,7 @@
 read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemons = 4) {
 
+  filename_output = "outputs/DF_lyrics/DF_lyrics.gz"
+
   # Read in parallel with n daemons
   mirai::daemons(0)
   mirai::daemons(daemons)
@@ -14,6 +16,8 @@ read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemo
     DF = DF_temp |> dplyr::filter(language %in% language_str)
     Available_langs = DF_temp |> dplyr::count(language) |> tidyr::drop_na(language) |> dplyr::arrange(dplyr::desc(n)) |> head(5) |> dplyr::pull(language)
 
+    filename_output = gsub("DF_lyrics\\.gz", paste0("DF_lyrics_", language, "\\.gz"), filename_output)
+
     if (nrow(DF) == 0) cli::cli_alert_info(paste0(language, " not found. The most common languages are: ", paste0(Available_langs, collapse = ", ")))
 
   } else {
@@ -22,7 +26,7 @@ read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemo
 
 
   if (write_output) {
-    data.table::fwrite(DF, file = "outputs/DF_lyrics/DF_lyrics.gz", nThread = daemons)
+    data.table::fwrite(DF, file = filename_output, nThread = daemons)
   }
 
   return(DF)

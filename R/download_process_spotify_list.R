@@ -15,7 +15,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
 
   # 1) Download Spotify website and process it
   cli::cli_h1("Downloading Spotify playlist")
-  OUT = lyriclensR:::download_and_process(WEB = spotify_list_URL)
+  OUT = download_and_process(WEB = spotify_list_URL)
 
 
   # 2) List not already downloaded artists
@@ -43,7 +43,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
     download_all_artists(c(Artistas_clean))
   } else {
     # OR download all!
-    download_all_artists(c(OUT))
+    download_all_artists(c(OUT$ARTISTAS))
   }
 
   # 4) Move to lyrics folder
@@ -55,7 +55,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
   lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)
 
   tictoc::tic()
-  DF_ALL = lyriclensR:::read_all_lyrics(lyrics, write_output = TRUE)
+  DF_ALL = read_all_lyrics(lyrics, write_output = TRUE)
   tictoc::toc()
 
   if (end_message) {
