@@ -49,7 +49,7 @@ def save_page(driver, WEB, page = 1):
 
 # Create driver instance (open browser)
 def createDriverInstance():
-    print("Creating new `driver`")
+    print("Opening browser")
     options = Options()
     # options.add_argument('--auto-open-devtools-for-tabs')
     options.headless = False

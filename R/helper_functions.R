@@ -1,5 +1,6 @@
 read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemons = 4) {
 
+  # Read in parallel with n daemons
   mirai::daemons(0)
   mirai::daemons(daemons)
   DF_temp = lyrics |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics))
@@ -21,7 +22,6 @@ read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemo
 
 
   if (write_output) {
-    # data.table::fwrite(DF, file = "outputs/DF_lyrics/DF_lyrics.csv", nThread = daemons)
     data.table::fwrite(DF, file = "outputs/DF_lyrics/DF_lyrics.gz", nThread = daemons)
   }
 
@@ -37,37 +37,29 @@ read_lyrics <- function(lyrics) {
   DF_ALL =
     seq_along(DF$songs) |>
     purrr::map_df(
-        ~ {
-      # .x = 2
-      # DF$songs[[.x]]$id
-      # DF$songs[[.x]]$artist
-      # DF$songs[[.x]]$artist_names
-      # DF$songs[[.x]]$primary_artist_names
-      # DF$songs[[.x]]$title
-      # DF$songs[[.x]]$full_title
-      # DF$songs[[.x]]$lyrics_state
-      # DF$songs[[.x]]$relationships_index_url
-      # DF$songs[[.x]]$release_date
-      # DF$songs[[.x]]$stats$pageviews
-      # # DF$songs[[.x]]$writer_artists
-      # DF$songs[[.x]]$media
-      # DF$songs[[.x]]$lyrics
+      ~ {
 
-      tibble::tibble(
-        id = DF$songs[[.x]]$id,
-        language = DF$songs[[.x]]$language,
-        release_date = DF$songs[[.x]]$release_date,
-        pageviews = DF$songs[[.x]]$stats$pageviews,
-        lyrics_state = DF$songs[[.x]]$lyrics_state,
-        artist = DF$songs[[.x]]$artist,
-        artists = DF$songs[[.x]]$artist_names,
-        title =  DF$songs[[.x]]$title,
-        lyrics_raw = as.character(DF$songs[[.x]]$lyrics),
-        lyrics = gsub(".*?Lyrics.*?\\n(.*)", "\\1", lyrics_raw),
-        link = paste0("https://genius.com", DF$songs[[.x]]$path)
+        # DF$songs[[.x]]$primary_artist_names
+        # DF$songs[[.x]]$full_title
+        # DF$songs[[.x]]$relationships_index_url
+        # DF$songs[[.x]]$writer_artists
+        # DF$songs[[.x]]$media
+
+        tibble::tibble(
+          id = DF$songs[[.x]]$id,
+          language = DF$songs[[.x]]$language,
+          release_date = DF$songs[[.x]]$release_date,
+          pageviews = DF$songs[[.x]]$stats$pageviews,
+          lyrics_state = DF$songs[[.x]]$lyrics_state,
+          artist = DF$songs[[.x]]$artist,
+          artists = DF$songs[[.x]]$artist_names,
+          title =  DF$songs[[.x]]$title,
+          lyrics_raw = as.character(DF$songs[[.x]]$lyrics),
+          lyrics = gsub(".*?Lyrics.*?\\n(.*)", "\\1", lyrics_raw),
+          link = paste0("https://genius.com", DF$songs[[.x]]$path)
         )
 
-    }) |>
+      }) |>
     dplyr::mutate(lyrics = gsub("La letra estará completa cuando salga la canción", "", lyrics))
 
   return(DF_ALL)
@@ -98,8 +90,8 @@ clean_words <- function(DF) {
                        "intro", "outro", "coro", "estribillo", "verso", "lyrics",
                        "chorus", "verse", "bridge",
                        "si", "pa", "na", "yeah", "yeh", "ey", "ah", "prr", "da", "va", "eh", "uh")
-                       )
                      )
+    )
 
 
   # Clean, get rid of stopwords, and filter
@@ -157,23 +149,16 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
     dplyr::mutate(Artista_clean = gsub(" ", "", Artista) |> tolower() |> iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT'),
                   Artista_clean = gsub("/", "", Artista_clean))
 
-
-
   ARTISTAS = DF_Artistas |> dplyr::pull(Artista_clean)
-
-  # ARTISTAS
 
   JSONs = gsub("Lyrics_(.*?)\\.json", "\\1", list.files(location_jsons, pattern = "json")) |>
     tolower() |>
     iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')
-  # JSONs[!JSONs %in% ARTISTAS]
-  # ARTISTAS[!ARTISTAS %in% JSONs]
 
   Artistas_missing =
     DF_Artistas |>
     dplyr::filter(Artista_clean %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
     dplyr::pull(Artista)
-
 
   return(Artistas_missing)
 }
@@ -182,7 +167,6 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
 download_all_artists <- function(artists) {
   seq_along(artists) |>
     purrr::walk(~{
-
       cli::cli_alert_info("{.x}/{length(artists)}: {artists[.x]}")
       OUT = get_songs_safely(artists[.x])
       Sys.sleep(runif(1, 10, 100))
@@ -210,12 +194,19 @@ song_is_in_lyrics <- function(name_song) {
                  deletions = .5,
                  substitutions = 0))
 
-  # FOUND
-
   # Search for song in DF
   DF_out = DF_ALL[title %in% FOUND] |>
     dplyr::select(id, artists, title)
 
   return(DF_out)
+
+}
+
+move_downloaded_lyrics <- function() {
+
+  downloaded = list.files(".", pattern = "json", full.names = TRUE)
+  destination = paste0("outputs/lyrics/", basename(downloaded))
+
+  file.rename(from = downloaded, to = destination)
 
 }
