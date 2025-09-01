@@ -1,5 +1,9 @@
+.Renviron
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 admin/
+DEV/
+rsconnect/
+venv/

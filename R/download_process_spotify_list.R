@@ -10,8 +10,6 @@
 #'
 #' @examples download_process_spotify_list("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
 download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, continue_after_error = FALSE, end_message = FALSE) {
-  # Top50 Spain
-  # spotify_list_URL = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
 
   # 1) Download Spotify website and process it
   cli::cli_h1("Downloading Spotify playlist")

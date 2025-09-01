@@ -83,5 +83,5 @@ process_html <- function(WEB, DEBUG = FALSE) {
     ARTISTAS = ARTISTAS
   )
 
-  return(ARTISTAS)
+  return(OUTPUT)
 }

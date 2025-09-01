@@ -4,4 +4,6 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^admin$
+^DEV$
 ^venv$
+^README\.Rmd$

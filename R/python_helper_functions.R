@@ -28,22 +28,3 @@ download_and_process <- function(WEB) {
 
   return(DF)
 }
-
-
-#' download_spotify_list_R
-#'
-#' @param WEB
-#'
-#' @returns Downloads a html file
-#' @export
-#' @importFrom reticulate source_python
-#' @examples download_spotify_list_R("https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2t")
-download_spotify_list_R <- function(WEB) {
-  # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF"
-  # Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3")
-  # reticulate::source_python(system.file("python", "get_songs.py", package = "lyriclensR"))
-  reticulate::py_run_file(system.file("python", "download_spotify_list.py", package = "lyriclensR"))
-  download_spotify_list(WEB)
-
-}
-

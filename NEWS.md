@@ -1,10 +1,12 @@
 # lyriclensR (development version)
 
-# lyriclensR 0.0.2.9100
+# lyriclensR 0.0.3.9000
 
 Major updates
 
-* 
+* Important clean up. 
+* Is now an R package
+* Created Github repo
 
 Minor updates
 
