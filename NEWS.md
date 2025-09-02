@@ -1,4 +1,4 @@
-# lyriclensR (development version)
+# lyriclensR 0.0.4
 
 Major updates
 
