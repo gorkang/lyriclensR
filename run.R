@@ -9,56 +9,39 @@ devtools::load_all()
 
 # GET Top50 songs ---------------------------------------------------------
 
-Top50 = get_and_process(WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
-download_all_songs(Top50)
+  Top50 = get_and_process(WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
+  download_all_songs(Top50)
 
 
 # Process all lyrics ------------------------------------------------------
 
-lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)
-
-# ALL Lyrics # 230 files - 47080 songs - 10 daemons - 31.5s
-tictoc::tic()
-DF_ALL = read_all_lyrics(lyrics, write_output = TRUE, daemons = 10)
-tictoc::toc()
-
-# Only Spanish
-tictoc::tic()
-DF_ALL = read_all_lyrics(lyrics, language = "es", write_output = TRUE, daemons = 10)
-tictoc::toc()
+  DF_ALL_es = process_all_lyrics(write_output = TRUE, language = "es")
+  DF_ALL_es = process_all_lyrics(write_output = TRUE)
 
 
-filename = here::here("outputs/DF_lyrics/DF_lyrics.gz")
-DF_ALL = data.table::fread(filename) |> tibble::as_tibble()
 
-# Duplicated songs
-DF_ALL |> dplyr::count(id) |> dplyr::filter(n>1) |> View()
+# Read data and save subset -----------------------------------------------
 
-download_process_spotify_list(spotify_list_URL = "https://open.spotify.com/playlist/3hdkI3sIYMAPTz2aXNgXt4",
-                              only_new = FALSE,
-                              continue_after_error = FALSE,
-                              end_message = TRUE)
+  n_subset = 100
 
-# Get all songs ------------------------------------------------------------------
+  filename = here::here("outputs/DF_lyrics/DF_lyrics_ALL_es.gz")
+  DF_ALL_es = data.table::fread(filename) |> tibble::as_tibble()
 
-# Top50 Spain
-download_process_spotify_list("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9",
-                              only_new = FALSE,
-                              continue_after_error = FALSE,
-                              end_message = TRUE)
+  set.seed(17)
+  DF_ALL_es |>
+    dplyr::slice_sample(n = n_subset) |>
+    data.table::fwrite("outputs/DF_lyrics/DF_lyrics_es.gz")
 
-# Top50 Global
-download_process_spotify_list("https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF",
-                              only_new = FALSE,
-                              continue_after_error = FALSE,
-                              end_message = TRUE)
 
-# Billboard Hot 100
-download_process_spotify_list("https://open.spotify.com/playlist/6UeSakyzhiEt4NB3UAd6NQ",
-                              only_new = FALSE,
-                              continue_after_error = FALSE,
-                              end_message = TRUE)
 
+# Get ALL songs from ALL artists ----------------------------------------------
+
+  # Use this function with caution
+  # Top50 Spain
+  download_process_spotify_list("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9",
+                                only_new = FALSE,
+                                continue_after_error = FALSE,
+                                end_message = TRUE)
 
 # Get songs ---------------------------------------------------------------
 
@@ -136,12 +119,14 @@ DF_songs_found = song_is_in_lyrics("amor")
 
 # Deploy app --------------------------------------------------------------
 
+# Need to use DF_lyrics_ALL.gz" to have all the lyrics
+
 rsconnect::deployApp(
   appFiles = c(
     "app.R",
     "R/search words.R",
     "R/helper_functions.R",
-    "outputs/DF_lyrics/DF_lyrics.gz"
+    "outputs/DF_lyrics/DF_lyrics_es.gz"
   ),
   appName = "lyriclensR"
 )

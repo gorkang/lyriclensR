@@ -4,7 +4,8 @@ library(shiny)
 # library(R.utils)
 
 invisible(lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source))
-filename = here::here("outputs/DF_lyrics/DF_lyrics.gz")
+filename = here::here("outputs/DF_lyrics/DF_lyrics_es.gz")
+
 DF_ALL = data.table::fread(filename) |>
   dplyr::distinct(id, .keep_all = TRUE)
 

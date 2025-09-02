@@ -1,4 +1,5 @@
 #' download_process_spotify_list
+#' Will download the FULL discography for the artists found in the Spotify list
 #'
 #' @param spotify_list_URL URL of Spotify list. For example: https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9
 #' @param only_new Download only authors we don't have?
@@ -51,9 +52,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
   cli::cli_h1("Process all lyrics")
   lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)
 
-  tictoc::tic()
   DF_ALL = read_all_lyrics(lyrics, write_output = TRUE)
-  tictoc::toc()
 
   if (end_message) {
     if (!require('ntfy')) remotes::install_github("jonocarroll/ntfy"); library('ntfy')

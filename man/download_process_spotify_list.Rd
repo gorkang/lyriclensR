@@ -2,7 +2,8 @@
 % Please edit documentation in R/download_process_spotify_list.R
 \name{download_process_spotify_list}
 \alias{download_process_spotify_list}
-\title{download_process_spotify_list}
+\title{download_process_spotify_list
+Will download the FULL discography for the artists found in the Spotify list}
 \usage{
 download_process_spotify_list(
   spotify_list_URL,
@@ -25,6 +26,7 @@ A DF with the full processed data
 }
 \description{
 download_process_spotify_list
+Will download the FULL discography for the artists found in the Spotify list
 }
 \examples{
 download_process_spotify_list("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")

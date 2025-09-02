@@ -39,7 +39,15 @@ get_individual_songs_safely = purrr::safely(get_individual_songs)
 
 
 
-# Get and process Spotify list html (create zip)
+#' get_and_process
+#' Get and process Spotify list html (create zip)
+#'
+#' @param WEB Spotify list URL
+#'
+#' @returns A DF
+#' @export
+#'
+#' @examples get_and_process("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
 get_and_process <- function(WEB) {
   # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
 

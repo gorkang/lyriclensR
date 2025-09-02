@@ -45,23 +45,20 @@ This is a basic example which shows you how to download all the lyrics for speci
 download_all_artists("Ye Vagabonds")
 ```
 
-A more complex example where we download and process all the lyrics for the artists of a Spotify list:
+Here we download and process the lyrics for the songs of a Spotify list:
 
 ```r
 library(lyriclensR)
 
-download_process_spotify_list(
-  spotify_list_URL = "https://open.spotify.com/playlist/3hdkI3sIYMAPTz2aXNgXt4",
-  only_new = FALSE,
-  continue_after_error = FALSE,
-  end_message = TRUE)
+MyList = get_and_process(WEB = "https://open.spotify.com/playlist/3hdkI3sIYMAPTz2aXNgXt4")
+download_all_songs(MyList)
 
 ```
 
 Search for a word in the lyrics
 
 ```{r search}
-# We include a lyrics file with the package
+# We include a small lyrics file with the package (100 songs)
 filename = system.file("extdata", package = "lyriclensR") |> list.files(full.names = TRUE)
 
 OUTPUT = lyriclensR::search_words(data = filename, 

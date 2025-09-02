@@ -1,48 +1,22 @@
-read_all_lyrics <- function(lyrics, write_output = FALSE, language = NULL, daemons = 4) {
+read_lyrics <- function(lyrics_file) {
 
-  filename_output = "outputs/DF_lyrics/DF_lyrics.gz"
+  DF_temp_lyric = jsonlite::read_json(lyrics_file)
+  # cat(DF$songs[[1]]$lyrics)
 
-  # Read in parallel with n daemons
-  mirai::daemons(0)
-  mirai::daemons(daemons)
-  DF_temp = lyrics |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics))
-  mirai::daemons(0)
-
-  if (!is.null(language)) {
-
-    # Avoid using same name as column
-    language_str = language
-
-    DF = DF_temp |> dplyr::filter(language %in% language_str)
-    Available_langs = DF_temp |> dplyr::count(language) |> tidyr::drop_na(language) |> dplyr::arrange(dplyr::desc(n)) |> head(5) |> dplyr::pull(language)
-
-    filename_output = gsub("DF_lyrics\\.gz", paste0("DF_lyrics_", language, "\\.gz"), filename_output)
-
-    if (nrow(DF) == 0) cli::cli_alert_info(paste0(language, " not found. The most common languages are: ", paste0(Available_langs, collapse = ", ")))
-
+  # Transforms DF_temp of single songs so it is similar to the one from an artist
+  if (is.null(DF_temp_lyric$songs)) {
+    DF = tibble::tibble(songs = list(DF_temp_lyric))
+  } else if (length(DF_temp_lyric$songs) > 0) {
+    DF = DF_temp_lyric
   } else {
-    DF = DF_temp
+    cli::cli_alert_info("Empty file: {lyrics_file}")
+    DF = tibble::tibble(songs = list(list(id = 0)))
   }
-
-
-  if (write_output) {
-    data.table::fwrite(DF, file = filename_output, nThread = daemons)
-  }
-
-  return(DF)
-
-}
-
-read_lyrics <- function(lyrics) {
-
-  DF = jsonlite::read_json(lyrics)
-  # cat(DF$songs[[11]]$lyrics)
 
   DF_ALL =
     seq_along(DF$songs) |>
     purrr::map_df(
       ~ {
-
         # DF$songs[[.x]]$primary_artist_names
         # DF$songs[[.x]]$full_title
         # DF$songs[[.x]]$relationships_index_url
@@ -69,6 +43,50 @@ read_lyrics <- function(lyrics) {
   return(DF_ALL)
 
 }
+
+
+read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output = NULL, language = NULL, daemons = 5) {
+
+  if (is.null(filename_output)) {
+    filename_output = "outputs/DF_lyrics/DF_lyrics_temp.gz"
+  } else {
+    # If we input a filename_output is because we want it to be written
+    write_output = TRUE
+  }
+
+  # Read in parallel with n daemons
+  mirai::daemons(0)
+  mirai::daemons(daemons)
+  DF_temp = lyrics_files |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics))
+  mirai::daemons(0)
+
+  # When language is set, check it exists, filter for that language, and change output name
+  if (!is.null(language)) {
+
+    # Avoid using same name as column
+    language_str = language
+
+    DF = DF_temp |> dplyr::filter(language %in% language_str)
+    Available_langs = DF_temp |> dplyr::count(language) |> tidyr::drop_na(language) |> dplyr::arrange(dplyr::desc(n)) |> head(5) |> dplyr::pull(language)
+
+    # If we set filename_output, this replacement won't be done
+    filename_output = gsub("DF_lyrics_temp\\.gz", paste0("DF_lyrics_", language, "\\.gz"), filename_output)
+
+    if (nrow(DF) == 0) cli::cli_alert_info(paste0(language, " not found. The most common languages are: ", paste0(Available_langs, collapse = ", ")))
+
+  } else {
+    DF = DF_temp
+  }
+
+
+  if (write_output) {
+    data.table::fwrite(DF, file = filename_output, nThread = daemons)
+  }
+
+  return(DF)
+
+}
+
 
 extract_words <- function(DF, ngram = 1) {
 
@@ -168,13 +186,13 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
 }
 
 
-download_all_artists <- function(artists) {
+download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20) {
 
   seq_along(artists) |>
     purrr::walk(~{
       cli::cli_alert_info("{.x}/{length(artists)}: {artists[.x]}")
       OUT = get_songs_safely(artists[.x])
-      Sys.sleep(runif(1, 10, 20))
+      Sys.sleep(runif(1, min_s_wait, max_s_wait))
       return(OUT)
     })
 
@@ -183,35 +201,13 @@ download_all_artists <- function(artists) {
 }
 
 
-  download_all_songs <- function(processed_spotify_list) {
-
-    DF_canciones = processed_spotify_list$DF_output
-
-    1:nrow(DF_canciones) |>
-      purrr::walk(~{
-
-        cli::cli_alert_info("{.x}/{nrow(DF_canciones)}: {DF_canciones$Cancion[.x]}")
-
-        OUT = get_individual_songs_safely(
-          name_artist = DF_canciones$Artista[.x],
-          name_song = DF_canciones$Cancion[.x]
-          )
-
-        Sys.sleep(runif(1, 5, 10))
-        return(OUT)
-      })
-
-    move_downloaded_lyrics()
-
-  }
 
 
-
-song_is_in_lyrics <- function(name_song) {
+song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics.gz") {
 
   # name_song = "amor"
 
-  filename = here::here("outputs/DF_lyrics/DF_lyrics.gz")
+  filename = here::here(filename)
   DF_ALL = data.table::fread(filename)
 
   # Fuzzy matching

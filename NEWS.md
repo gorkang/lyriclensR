@@ -2,11 +2,15 @@
 
 Major updates
 
-* Upload to Github processed lyrics (Spanish) ~ 9Mb
+* New function to download all individual songs of Spotify list
+* New function to process all jsons (authors + songs)
+* Upload to Github a small sample (100) of processed lyrics (Spanish)
+* get_spotify_list() should be more robust
 
 Minor updates
 
-* 
+* Clean up
+* Rename
 
 
 # lyriclensR 0.0.3
