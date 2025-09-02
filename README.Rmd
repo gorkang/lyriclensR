@@ -36,9 +36,12 @@ reticulate::py_install("undetected_chromedriver", method = "virtualenv")
 reticulate::py_install("setuptools", method = "virtualenv") # setuptools includes distutils
 ``` 
 
+Will need a `.Renviron` variable called `GENIUS_TOKEN` with your Genius API.
+
+
 ## Example
 
-This is a basic example which shows you how to download all the lyrics for specific artists using the Genius API (maximum of 5000 calls for each account per day. For more information https://developer.subscriptiongenius.com/2/intro/):
+This is a basic example which shows you how to download all the lyrics for specific artists using the Genius API (maximum of 5000 calls for each account per day. Please, be gentle and avoid massive downloads. For more information https://developer.subscriptiongenius.com/2/intro/):
 
 
 ```r

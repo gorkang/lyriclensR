@@ -7,10 +7,10 @@
 #' @importFrom reticulate source_python
 #' @examples get_songs("Tool")
 get_songs <- function(name_artist) {
-  # Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3.12")
+
+    # Sys.setenv(RETICULATE_PYTHON="/usr/bin/python3.12")
   reticulate::source_python(system.file("python", "get_songs.py", package = "lyriclensR"))
   get_songs(name_artist)
-
 
 }
 
@@ -28,9 +28,9 @@ get_songs_safely = purrr::safely(get_songs)
 #' @importFrom reticulate source_python
 #' @examples get_individual_songs("Tool", "46&2")
 get_individual_songs <- function(name_artist, name_song) {
+
   reticulate::source_python(system.file("python", "get_individual_songs.py", package = "lyriclensR"))
   get_individual_songs(name_artist, name_song)
-
 
 }
 

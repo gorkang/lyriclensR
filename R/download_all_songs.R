@@ -16,15 +16,18 @@ download_all_songs <- function(processed_spotify_list, min_s_wait = 5, max_s_wai
   1:nrow(DF_canciones) |>
     purrr::walk(~{
 
-      cli::cli_alert_info("{.x}/{nrow(DF_canciones)}: {DF_canciones$Cancion[.x]} - {DF_canciones$Artista[.x]}")
+      seconds_pause = runif(1, min_s_wait, max_s_wait)
+
+      cli::cli_alert_info("{.x}/{nrow(DF_canciones)}: {DF_canciones$Cancion[.x]} - {DF_canciones$Artista[.x]} | pause {seconds_pause}s.")
 
       OUT = get_individual_songs_safely(
         name_artist = DF_canciones$Artista[.x],
         name_song = DF_canciones$Cancion[.x]
       )
 
-      Sys.sleep(runif(1, min_s_wait, max_s_wait))
+      Sys.sleep(seconds_pause)
       return(OUT)
+
     })
 
   move_downloaded_lyrics()
