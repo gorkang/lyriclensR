@@ -64,8 +64,8 @@ def get_spotify_list(WEB):
   # Open web
   driver.get(WEB)
 
-  # Wait 5 secs or until element is present
-  timeout = 5
+  # Wait 60 secs or until element is present
+  timeout = 60
   element_present = EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]'))
   WebDriverWait(driver, timeout).until(element_present)
 
