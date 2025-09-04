@@ -14,7 +14,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
 
   # 1) Download Spotify website and process it
   cli::cli_h1("Downloading Spotify playlist")
-  OUT = get_and_process(WEB = spotify_list_URL)
+  OUT = get_and_process_spotify_list(spotify_list_URL = spotify_list_URL)
 
 
   # 2) List not already downloaded artists
@@ -38,10 +38,10 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
   # 3) Download all artists Lyrics
   cli::cli_h1("Download artists")
   if (only_new) {
-    download_all_artists(c(Artistas_clean))
+    download_all_artists(artists = c(Artistas_clean))
   } else {
     # OR download all!
-    download_all_artists(c(OUT$ARTISTAS))
+    download_all_artists(artists = c(OUT$ARTISTAS))
   }
 
   # 4) Move to lyrics folder

@@ -1,4 +1,4 @@
-#' download_all_songs
+#' download_individual_songs
 #' Download all songs from a processed spotify list
 #'
 #' @param processed_spotify_list A spotify list from get_spotify_list()
@@ -8,24 +8,22 @@
 #' @returns .json files downloaded using the Genius API
 #' @export
 #'
-#' @examples download_all_songs(processed_spotify_list)
-download_all_songs <- function(processed_spotify_list, min_s_wait = 5, max_s_wait = 10) {
+#' @examples download_individual_songs(processed_spotify_list)
+download_individual_songs <- function(processed_spotify_list, min_s_wait = 5, max_s_wait = 10) {
 
   DF_canciones = processed_spotify_list$DF_output
 
   1:nrow(DF_canciones) |>
     purrr::walk(~{
 
-      seconds_pause = runif(1, min_s_wait, max_s_wait)
+      cli::cli_alert_info("{.x}/{nrow(DF_canciones)}")
 
-      cli::cli_alert_info("{.x}/{nrow(DF_canciones)}: {DF_canciones$Cancion[.x]} - {DF_canciones$Artista[.x]} | pause {seconds_pause}s.")
-
-      OUT = get_individual_songs_safely(
+      OUT = download_song_safely(
         name_artist = DF_canciones$Artista[.x],
-        name_song = DF_canciones$Cancion[.x]
+        name_song = DF_canciones$Cancion[.x],
+        min_s_wait = 5, max_s_wait = 10
       )
 
-      Sys.sleep(seconds_pause)
       return(OUT)
 
     })

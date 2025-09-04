@@ -7,7 +7,7 @@
 create_wordcloud(lyrics, ngram = 1)
 }
 \arguments{
-\item{lyrics}{JSON file with lyrics}
+\item{lyrics}{JSON file with lyrics of DF_lyrics}
 
 \item{ngram}{Show n continuous words}
 }

@@ -1,3 +1,10 @@
+# lyriclensR 0.0.5
+
+Major updates
+
+* major rename and reorganization
+* new separate_paragraphs function
+
 # lyriclensR 0.0.4
 
 Major updates

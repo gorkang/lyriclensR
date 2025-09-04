@@ -1,6 +1,6 @@
 #' search_words
 #'
-#' @param data File with lyrics songs (json or csv)
+#' @param lyrics JSON file with lyrics of DF_lyrics
 #' @param highlight_words Words to highlight
 #' @param n_sentences_around How many sentences to show around the highlighted words
 #'
@@ -12,13 +12,13 @@
 #' @returns A DT table
 #' @export
 #'
-#' @examples  search_words(data = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
-search_words <- function(data, highlight_words, n_sentences_around = 2) {
+#' @examples  search_words(lyrics = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
+search_words <- function(lyrics, highlight_words, n_sentences_around = 2) {
 
   # filename = here::here("outputs/DF_lyrics/DF_lyrics.gz")
-  # data = data.table::fread(filename)
+  # lyrics = data.table::fread(filename)
 
-  # data = "outputs/lyrics/Lyrics_MykeTowers.json"
+  # lyrics = "outputs/lyrics/Lyrics_MykeTowers.json"
   # highlight_words = "culo"
   # n_sentences_around = 1
 
@@ -31,17 +31,17 @@ search_words <- function(data, highlight_words, n_sentences_around = 2) {
   # set.seed(12)
 
   # Read json or use DF
-  if (is.data.frame(data)) {
-    DF = data
-    } else if (grepl("json", data)) {
-    DF = read_lyrics(data)
+  if (is.data.frame(lyrics)) {
+    DF_lyrics = lyrics
+    } else if (grepl("json", lyrics)) {
+      DF_lyrics = read_lyrics(lyrics)
   } else {
-    cli::cli_abort("data should be either a DF created by 'read_lyrics' or a json file")
+    cli::cli_abort("lyrics should be either a DF created by 'read_lyrics()' or a json file")
   }
 
 
   DF_temp =
-    DF |>
+    DF_lyrics |>
     # Show only songs with the words
     dplyr::filter(grepl(highlight_words, lyrics, ignore.case = TRUE))|>
     dplyr::mutate(

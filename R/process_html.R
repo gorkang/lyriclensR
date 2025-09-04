@@ -1,18 +1,18 @@
 #' process_html
 #'
-#' @param WEB URL for Spotify list
+#' @param spotify_list_URL URL for Spotify list
 #' @param DEBUG TRUE/FALSE, show songs in Console
 #'
 #' @returns A list with a DF and a vector of ARTISTS
 #' @export
 #'
 #' @examples process_html("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
-process_html <- function(WEB, DEBUG = FALSE) {
+process_html <- function(spotify_list_URL, DEBUG = FALSE) {
 
   # ERRORS:
   # Tyler, The Creator # Is an author. It gets changed to: c("Tyler", "The creator") # DICCIONARY with exceptions?
 
-  part_URL = gsub("/en/|/", "_", gsub("https://open.spotify.com/playlist/", "", WEB))
+  part_URL = gsub("/en/|/", "_", gsub("https://open.spotify.com/playlist/", "", spotify_list_URL))
 
   FILES = list.files("outputs/www/",
                      pattern = part_URL,

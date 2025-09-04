@@ -20,14 +20,14 @@ from bs4 import BeautifulSoup
 import requests
 
 
-def save_page(driver, WEB, page = 1):
+def save_page(driver, spotify_list_URL, page = 1):
 
   # Save page  
-  print("Saving page " + str(page))
+  print("Saving page " + str(spotify_list_URL))
   
   # File name
-  part_URL =  re.sub("/en/|/", "_", re.sub("https://open.spotify.com/playlist/", "", WEB))
-  file_name = "outputs/www/" + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + part_URL + str(page) + ".html"
+  part_URL =  re.sub("/en/|/", "_", re.sub("https://open.spotify.com/playlist/", "", spotify_list_URL))
+  file_name = "outputs/www/" + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + part_URL + ".html"
   
   # Write html file
   with open(file_name, "w", encoding='utf-8') as f:
@@ -47,8 +47,8 @@ def createDriverInstance():
     return driver
 
 
-def get_spotify_list(WEB):
-  # WEB = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
+def py_download_spotify_list(spotify_list_URL):
+  # spotify_list_URL = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
 
   from selenium import webdriver
   from selenium.common.exceptions import TimeoutException
@@ -62,7 +62,7 @@ def get_spotify_list(WEB):
   driver = createDriverInstance()
   
   # Open web
-  driver.get(WEB)
+  driver.get(spotify_list_URL)
 
   # Wait 60 secs or until element is present
   timeout = 60
@@ -98,6 +98,6 @@ def get_spotify_list(WEB):
   
   # Save web
   time.sleep(2.5)
-  SAVE = save_page(driver, WEB, 1)
+  SAVE = save_page(driver, spotify_list_URL, 1)
   
   driver.quit()

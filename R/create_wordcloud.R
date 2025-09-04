@@ -1,6 +1,6 @@
 #' create_wordcloud
 #'
-#' @param lyrics JSON file with lyrics
+#' @param lyrics JSON file with lyrics of DF_lyrics
 #' @param ngram Show n continuous words
 #' @importFrom dplyr filter
 #' @importFrom ggplot2 ggplot aes geom_histogram scale_x_continuous theme_minimal

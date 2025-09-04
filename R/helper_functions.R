@@ -38,6 +38,8 @@ read_lyrics <- function(lyrics_file) {
         )
 
       }) |>
+
+    # Clean
     dplyr::mutate(lyrics = gsub("La letra estará completa cuando salga la canción", "", lyrics))
 
   return(DF_ALL)
@@ -80,6 +82,7 @@ read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output 
 
 
   if (write_output) {
+    if (!dir.exists(dirname(filename_output))) dir.create(dirname(filename_output))
     data.table::fwrite(DF, file = filename_output, nThread = daemons)
   }
 
@@ -88,18 +91,18 @@ read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output 
 }
 
 
-extract_words <- function(DF, ngram = 1) {
+extract_words <- function(DF_lyrics, ngram = 1) {
 
-  DF_ngram =
-    DF |>
+  DF_words =
+    DF_lyrics |>
     dplyr::select(lyrics) |>
     tidytext::unnest_tokens(word, lyrics, token = "ngrams", n = ngram) |>
     dplyr::filter(!grepl("^contributor", word))
 
-  return(DF_ngram)
+  return(DF_words)
 }
 
-clean_words <- function(DF) {
+clean_words <- function(DF_words) {
 
   # Create DF of stop words
   custom_stop_words <-
@@ -117,7 +120,7 @@ clean_words <- function(DF) {
 
 
   # Clean, get rid of stopwords, and filter
-  DF_clean = DF |>
+  DF_clean = DF_words |>
 
     # Delete everything between []
     # gsub("\\s*\\[[^\\)]+\\]", "", as.character(DF$songs[[.x]]$lyrics))
@@ -147,7 +150,7 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
 
   if (grepl("\\.csv", input[1])) {
 
-    DF = readr::read_csv(input)
+    DF = readr::read_csv(input, show_col_types = FALSE)
 
     DF_temp = DF|>
 
@@ -191,7 +194,7 @@ download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20) {
   seq_along(artists) |>
     purrr::walk(~{
       cli::cli_alert_info("{.x}/{length(artists)}: {artists[.x]}")
-      OUT = get_songs_safely(artists[.x])
+      OUT = download_full_discography_safely(artists[.x])
       Sys.sleep(runif(1, min_s_wait, max_s_wait))
       return(OUT)
     })
@@ -203,7 +206,7 @@ download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20) {
 
 
 
-song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics.gz") {
+song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics_ALL.gz") {
 
   # name_song = "amor"
 
@@ -234,6 +237,8 @@ move_downloaded_lyrics <- function() {
 
   downloaded = list.files(".", pattern = "json", full.names = TRUE)
 
+  if (length(NUM) == 0) return(NULL)
+
   NUM = stringr::str_count(downloaded, pattern = "_")
 
   # 1 "_" is a full artist, 2 "_" is a specific song
@@ -245,6 +250,23 @@ move_downloaded_lyrics <- function() {
     cli::cli_abort("The number of '_' is not 1 or 2: {downloaded}")
   }
 
-  file.rename(from = downloaded, to = destination)
+  file.rename(from = downloaded,
+              to = destination)
+
+}
+
+
+
+save_experiment_materials <- function(DF_paragraphs, sample_n, filename_output = "stimuli.js") {
+  # sample_n = 10
+
+  # Create materials for experiment
+  X1 = DF_paragraphs |>
+    dplyr::sample_n(sample_n) |>
+    dplyr::mutate(paragraph = gsub("\\n", "<BR>", paragraph))
+
+  # Add js var and write
+  paste0("var test_stimuli = ", jsonlite::toJSON(X1, POSIXt = "ISO8601")) |>
+    readr::write_lines(filename_output)
 
 }

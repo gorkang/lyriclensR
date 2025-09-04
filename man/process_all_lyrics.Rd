@@ -5,6 +5,8 @@
 \title{process_all_lyrics}
 \usage{
 process_all_lyrics(
+  folder_lyrics_artists = "outputs/lyrics/",
+  folder_lyrics_songs = "outputs/lyrics_individual_songs/",
   daemons_artists = 10,
   daemons_songs = 5,
   write_output = FALSE,
@@ -13,11 +15,17 @@ process_all_lyrics(
 )
 }
 \arguments{
+\item{folder_lyrics_artists}{Location of json files for full artists}
+
+\item{folder_lyrics_songs}{Location of json files for songs}
+
 \item{daemons_artists}{cores to process artists json lyrics}
 
 \item{daemons_songs}{cores to process songs json lyrics}
 
 \item{write_output}{TRUE/FALSE}
+
+\item{filename_output}{Name of output file}
 
 \item{language}{Filter by language? Most common: en, es, fr, pt, ko}
 }

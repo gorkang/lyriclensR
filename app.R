@@ -13,7 +13,9 @@ DF_ALL = data.table::fread(filename) |>
 # ALL_artists = sort(unique(DF_ALL$artist))
 ALL_artists = DF_ALL |>
   dplyr::count(artist) |>
-  dplyr::filter(n > 20) |>
+  dplyr::arrange(dplyr::desc(n)) |>
+  head(50) |>
+  # dplyr::filter(n > 20) |>
   dplyr::arrange(artist) |>
   dplyr::pull(artist)
 
@@ -93,7 +95,7 @@ server <- function(input, output) {
   TABLE <- reactive({
 
       search_words(
-        data = DATAFRAME(),
+        lyrics = DATAFRAME(),
         # data =  DF_ALL |> dplyr::filter(artist %in% input$artists),
         highlight_words = input$word,
         n_sentences_around = input$n_sentences_around)

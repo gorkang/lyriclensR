@@ -4,10 +4,10 @@
 \alias{search_words}
 \title{search_words}
 \usage{
-search_words(data, highlight_words, n_sentences_around = 2)
+search_words(lyrics, highlight_words, n_sentences_around = 2)
 }
 \arguments{
-\item{data}{File with lyrics songs (json or csv)}
+\item{lyrics}{JSON file with lyrics of DF_lyrics}
 
 \item{highlight_words}{Words to highlight}
 
@@ -20,5 +20,5 @@ A DT table
 search_words
 }
 \examples{
- search_words(data = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
+ search_words(lyrics = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
 }

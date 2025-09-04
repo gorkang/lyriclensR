@@ -1,9 +1,6 @@
 # https://pypi.org/project/lyricsgenius/
-def get_individual_songs(name_artist, name_song):
+def py_download_song(name_artist, name_song):
 
-  # name_song = "Yo y tu"
-  # name_artist = "Ovy On The Drums"
-  
   # Dependencies Installation
   # reticulate::py_install("lyricsgenius", method = "virtualenv")
   

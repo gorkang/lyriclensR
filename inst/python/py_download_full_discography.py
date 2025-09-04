@@ -1,5 +1,5 @@
 # https://pypi.org/project/lyricsgenius/
-def get_songs(name_artist):
+def py_download_full_discography(name_artist):
 
   # Dependencies Installation
   # reticulate::py_install("lyricsgenius", method = "virtualenv")

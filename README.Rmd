@@ -53,8 +53,8 @@ Here we download and process the lyrics for the songs of a Spotify list:
 ```r
 library(lyriclensR)
 
-MyList = get_and_process(WEB = "https://open.spotify.com/playlist/3hdkI3sIYMAPTz2aXNgXt4")
-download_all_songs(MyList)
+MyList = get_and_process_spotify_list(spotify_list_URL = "https://open.spotify.com/playlist/3hdkI3sIYMAPTz2aXNgXt4")
+download_individual_songs(MyList)
 
 ```
 
@@ -64,8 +64,8 @@ Search for a word in the lyrics
 # We include a small lyrics file with the package (100 songs)
 filename = system.file("extdata", package = "lyriclensR") |> list.files(full.names = TRUE)
 
-OUTPUT = lyriclensR::search_words(data = filename, 
-                         highlight_words = "love")
+OUTPUT = lyriclensR::search_words(lyrics = filename, 
+                                  highlight_words = "love")
 
 # Here we show only 2 results
 knitr::kable(OUTPUT$DF_table |> dplyr::slice_sample(n = 2))

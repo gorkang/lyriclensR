@@ -4,10 +4,10 @@
 \alias{process_html}
 \title{process_html}
 \usage{
-process_html(WEB, DEBUG = FALSE)
+process_html(spotify_list_URL, DEBUG = FALSE)
 }
 \arguments{
-\item{WEB}{URL for Spotify list}
+\item{spotify_list_URL}{URL for Spotify list}
 
 \item{DEBUG}{TRUE/FALSE, show songs in Console}
 }
