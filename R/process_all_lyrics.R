@@ -37,11 +37,8 @@ process_all_lyrics <- function(folder_lyrics_artists = "outputs/lyrics/",
   DF_ALL_artists = read_all_lyrics(lyrics_files = lyrics_artists, write_output = FALSE, daemons = daemons_artists)
   DF_ALL_songs = read_all_lyrics(lyrics_files = lyrics_songs, write_output = FALSE, daemons = daemons_songs)
 
-  # Combine only new songs
-  NEW_songs = DF_ALL_songs |> dplyr::anti_join(DF_ALL_artists, by = join_by(id))
-  DF_ALL = DF_ALL_artists |>
-    dplyr::bind_rows(NEW_songs) |>
-    dplyr::distinct(id, .keep_all = TRUE) # Remove duplicates by id
+  # Combine only new songs and output unique songs
+  DF_ALL = combine_new_songs(DF_main = DF_ALL_artists, DF_new = DF_ALL_songs)
 
 
   # When language is set, check it exists, filter for that language, and change output name

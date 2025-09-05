@@ -1,4 +1,7 @@
 read_lyrics <- function(lyrics_file) {
+  # lyrics_file = lyrics_jsons[1]
+
+  if (!tools::file_ext(lyrics_file) == "json") return(NULL)
 
   DF_temp_lyric = jsonlite::read_json(lyrics_file)
   # cat(DF$songs[[1]]$lyrics)
@@ -39,8 +42,12 @@ read_lyrics <- function(lyrics_file) {
 
       }) |>
 
+    # Add source
+    dplyr::mutate(json_file = basename(lyrics_file)) |>
+
     # Clean
     dplyr::mutate(lyrics = gsub("La letra estará completa cuando salga la canción", "", lyrics))
+
 
   return(DF_ALL)
 
@@ -59,7 +66,7 @@ read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output 
   # Read in parallel with n daemons
   mirai::daemons(0)
   mirai::daemons(daemons)
-  DF_temp = lyrics_files |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics))
+  DF_temp = lyrics_files |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics)) # If we add parameters, need to include parameter = parameter at the end
   mirai::daemons(0)
 
   # When language is set, check it exists, filter for that language, and change output name
@@ -81,7 +88,7 @@ read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output 
   }
 
 
-  if (write_output) {
+  if (write_output & nrow(DF) > 0) {
     if (!dir.exists(dirname(filename_output))) dir.create(dirname(filename_output))
     data.table::fwrite(DF, file = filename_output, nThread = daemons)
   }
@@ -237,9 +244,10 @@ move_downloaded_lyrics <- function() {
 
   downloaded = list.files(".", pattern = "json", full.names = TRUE)
 
+  NUM = stringr::str_count(downloaded, pattern = "_")
+
   if (length(NUM) == 0) return(NULL)
 
-  NUM = stringr::str_count(downloaded, pattern = "_")
 
   # 1 "_" is a full artist, 2 "_" is a specific song
   if (all(NUM == 1)) {
@@ -268,5 +276,96 @@ save_experiment_materials <- function(DF_paragraphs, sample_n, filename_output =
   # Add js var and write
   paste0("var test_stimuli = ", jsonlite::toJSON(X1, POSIXt = "ISO8601")) |>
     readr::write_lines(filename_output)
+
+}
+
+
+combine_new_songs <- function(DF_main, DF_new) {
+
+  # REVIEW: Not sure if we should return main or null
+  if(nrow(DF_new) == 0) return(DF_main)
+
+  # First time, only new songs
+  if (is.null(DF_main)) {
+    DF_ALL = DF_new
+  } else {
+    # Combine only new songs
+    NEW_songs = DF_new |> dplyr::anti_join(DF_main, by = dplyr::join_by(id))
+    DF_ALL = DF_main |>
+      dplyr::bind_rows(NEW_songs) |>
+      dplyr::distinct(id, .keep_all = TRUE) # Remove duplicates by id
+
+  }
+
+return(DF_ALL)
+}
+
+
+update_main_DB <- function(DF_lyrics_new, DF_lyrics_current, filename_current_lyrics) {
+
+  if (!is.null(DF_lyrics_new)) {
+
+    DF_updated = lyriclensR:::combine_new_songs(DF_main = DF_lyrics_current,
+                                                DF_new = DF_lyrics_new)
+
+    if (!identical(DF_lyrics_current, DF_updated)) {
+
+      # Save new current file
+      data.table::fwrite(DF_updated, file = filename_current_lyrics)
+      cli::cli_alert_info("{nrow(DF_updated)} new lyrics")
+
+      paste0(nrow(DF_lyrics_new), " new lyrics")
+
+    }
+
+    # Delete temp file
+    # temp_file = "outputs/DF_lyrics/DF_lyrics_NEW_temp.gz"
+    # if (file.exists(temp_file)) file.remove(temp_file)
+
+
+  } else {
+    cli::cli_alert_info("NO new lyrics")
+    "NO new lyrics"
+  }
+
+
+}
+
+
+move_lyrics_to_processed <- function(lyrics_jsons, move_lyrics_file_to = NULL, ...) {
+
+  if (length(lyrics_jsons) == 1 & lyrics_jsons[1] == "inputs//README") return(NULL)
+
+  # If not null, move json file to destination
+  if (!is.null(move_lyrics_file_to) & !is.null(lyrics_jsons)) {
+
+    lyrics_jsons = lyrics_jsons[!lyrics_jsons == "inputs//README"]
+
+    if (!dir.exists(move_lyrics_file_to)) cli::cli_abort("{here::here(move_lyrics_file_to)} does not exist")
+    OUT = paste0(move_lyrics_file_to, "/", basename(lyrics_jsons))
+    fs::file_move(lyrics_jsons, OUT)
+    # fs::file_copy(lyrics_file, OUT, overwrite = TRUE)
+  }
+}
+
+
+read_DF_ALL <- function(filename_current, what) {
+
+  if (!what %in% c("lyrics", "paragraphs")) cli::cli_abort("what SHOULD be either `lyrics` or `paragraphs`")
+
+  # Actual filename and path will depend of `what`
+  file_current = paste0("outputs/DF_", what, "/DF_", what, "_ALL.gz")
+
+  if (file.exists(file_current)) { # Hardcoded above because filename_current is NULL the first time
+
+    placeholder_file = paste0(tools::file_path_sans_ext(filename_current), ".placeholder")
+
+    # Get rid of the template file. We needed so tar_files_input(filename_current,... does not fail
+    filename_clean = filename_current[filename_current != placeholder_file]#"outputs/DF_lyrics//DF_lyrics_ALL.template"]
+    data.table::fread(filename_clean) |> dplyr::mutate(release_date = as.character(release_date))
+
+  } else {
+    NULL
+  }
 
 }
