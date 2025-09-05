@@ -244,19 +244,22 @@ move_downloaded_lyrics <- function() {
 
   downloaded = list.files(".", pattern = "json", full.names = TRUE)
 
-  NUM = stringr::str_count(downloaded, pattern = "_")
+  # NUM = stringr::str_count(downloaded, pattern = "_")
+  #
+  # if (length(NUM) == 0) return(NULL)
+  #
+  #
+  # # 1 "_" is a full artist, 2 "_" is a specific song
+  # if (all(NUM == 1)) {
+  #   destination = paste0("outputs/lyrics/", basename(downloaded))
+  # } else if (all(NUM == 2)) {
+  #   destination = paste0("outputs/lyrics_individual_songs/", basename(downloaded))
+  # } else {
+  #   cli::cli_abort("The number of '_' is not 1 or 2: {downloaded}")
+  # }
 
-  if (length(NUM) == 0) return(NULL)
+  destination = paste0("inputs/", basename(downloaded))
 
-
-  # 1 "_" is a full artist, 2 "_" is a specific song
-  if (all(NUM == 1)) {
-    destination = paste0("outputs/lyrics/", basename(downloaded))
-  } else if (all(NUM == 2)) {
-    destination = paste0("outputs/lyrics_individual_songs/", basename(downloaded))
-  } else {
-    cli::cli_abort("The number of '_' is not 1 or 2: {downloaded}")
-  }
 
   file.rename(from = downloaded,
               to = destination)
@@ -326,6 +329,7 @@ update_main_DB <- function(DF_new, DF_current, filename_current, what) {
   if (!what %in% c("lyrics", "paragraphs")) cli::cli_abort("what SHOULD be either `lyrics` or `paragraphs`")
 
 
+  # If there are NEW lyrics or paragraphs
   if (!is.null(DF_new)) {
 
     DF_updated = combine_new_songs(DF_main = DF_current,
@@ -338,13 +342,9 @@ update_main_DB <- function(DF_new, DF_current, filename_current, what) {
       data.table::fwrite(DF_updated, file = filename_current)
       cli::cli_alert_info("{nrow(DF_updated)} new {what}")
 
-      paste0(nrow(DF_new), " new lyrics")
-
+    } else {
+      cli::cli_alert_info("No new {what}")
     }
-
-    # Delete temp file
-    # temp_file = "outputs/DF_lyrics/DF_lyrics_NEW_temp.gz"
-    # if (file.exists(temp_file)) file.remove(temp_file)
 
 
   } else {
