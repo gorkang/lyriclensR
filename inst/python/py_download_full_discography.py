@@ -15,5 +15,6 @@ def py_download_full_discography(name_artist):
   # remove_section_headers=False # If `True`, removes [Chorus], [Bridge], etc. headers from lyrics.
   artist = genius.search_artist(name_artist, max_songs=3000, sort="popularity", get_full_info=True, include_features=True)
   
+  #Save
   print("Saving: " + str(name_artist))
   artist.save_lyrics()

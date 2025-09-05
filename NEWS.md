@@ -1,3 +1,9 @@
+# lyriclensR 0.0.6
+
+Major updates
+
+* Full pipeline working
+
 # lyriclensR 0.0.5
 
 Major updates

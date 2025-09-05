@@ -1,33 +1,29 @@
 library(targets)
 library(tarchetypes)
 
-tar_option_set(packages = c("tibble", "qs2", "lyriclensR"))
+targets::tar_option_set(packages = c("tibble", "qs2", "lyriclensR"))
 
 # Run the R scripts in R/
-tar_source()
+targets::tar_source()
 
-# TODO: Create them if not present
-# WE NEED empty placeholder files in:
-# - inputs/README
-# - outputs/DF_lyrics//DF_lyrics_ALL.placeholder
-# - outputs/DF_paragraph//DF_paragraph_ALL.placeholder
+# WE NEED empty placeholder files in inputs, outputs/DF_lyrics and
+# outputs/DF_paragraphs for tar_files_input() to work
+check_placeholder_files()
 
+# Targets list
 list(
 
   # Process NEW FILES --------------------------------------------------------
 
-    # Input json files
-    tar_files_input(lyrics_jsons, list.files("inputs/", full.names = TRUE)),
+  # Input json files
+  tar_files_input(lyrics_jsons, list.files("inputs/", full.names = TRUE)),
 
-    # Create TEMP files with ALL input files
-    tar_target(
-      DF_lyrics_new, read_all_lyrics(
-        lyrics_files = lyrics_jsons,
-        daemons = 10
-        # filename_output = "outputs/DF_lyrics/DF_lyrics_NEW_temp.gz"
-        )
-      ),
+  # Create TEMP files with ALL input files
+  tar_target(DF_lyrics_new, read_all_lyrics(lyrics_files = lyrics_jsons,
+                                            daemons = 10)),
 
+  tar_target(DF_paragraphs_new, separate_paragraphs(DF_lyrics = DF_lyrics_new,
+                                                    filename_output = "outputs/DF_paragraphs/DF_paragraphs_ALL.gz")),
 
 
   # CURRENT FILES -----------------------------------------------------------
@@ -44,16 +40,22 @@ list(
 
   # UPDATE ------------------------------------------------------------------
 
-  # Update main file if there are new lyrics
-  tar_target(DF_updated, update_main_DB(DF_lyrics_new = DF_lyrics_new,
-                                        DF_lyrics_current = DF_lyrics_current,
-                                        # Hardcoded because filename_current_DF is NULL the first time
-                                        filename_current_lyrics = "outputs/DF_lyrics/DF_lyrics_ALL.gz")
-  ),
+  # Update main lyrics file if there are new lyrics
+  tar_target(DF_lyrics_updated, update_main_DB(DF_new = DF_lyrics_new,
+                                               DF_current = DF_lyrics_current,
+                                               # Hardcoded because filename_current_DF is NULL the first time
+                                               filename_current = "outputs/DF_lyrics/DF_lyrics_ALL.gz",
+                                               what = "lyrics")),
 
+  # Update main paragraphs file if there are new lyrics
+  tar_target(DF_paragraphs_updated, update_main_DB(DF_new = DF_paragraphs_new,
+                                                   DF_current = DF_paragraphs_current,
+                                                   # Hardcoded because filename_current_DF is NULL the first time
+                                                   filename_current = "outputs/DF_paragraphs/DF_paragraphs_ALL.gz",
+                                                   what = "paragraphs")),
   # Clean up json files
   tar_target(MOVED_jsons, move_lyrics_to_processed(lyrics_jsons,
                                                    move_lyrics_file_to = "outputs/processed_lyrics/",
-                                                   DF_updated))
+                                                   DF_lyrics_updated))
 
 )

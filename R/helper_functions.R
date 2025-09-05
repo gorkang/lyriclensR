@@ -280,20 +280,40 @@ save_experiment_materials <- function(DF_paragraphs, sample_n, filename_output =
 }
 
 
-combine_new_songs <- function(DF_main, DF_new) {
+combine_new_songs <- function(DF_main, DF_new, what) {
 
   # REVIEW: Not sure if we should return main or null
   if(nrow(DF_new) == 0) return(DF_main)
 
   # First time, only new songs
   if (is.null(DF_main)) {
-    DF_ALL = DF_new
+
+    return(DF_new)
+
   } else {
+
     # Combine only new songs
     NEW_songs = DF_new |> dplyr::anti_join(DF_main, by = dplyr::join_by(id))
-    DF_ALL = DF_main |>
-      dplyr::bind_rows(NEW_songs) |>
-      dplyr::distinct(id, .keep_all = TRUE) # Remove duplicates by id
+
+
+    if (what == "lyrics") {
+
+      DF_ALL = DF_main |>
+        # REVIEW as.character(release_date) SHOULD not be there. We loose the date format at some point
+        # dplyr::mutate(release_date = as.character(release_date)) |>
+
+        dplyr::bind_rows(NEW_songs) |>
+        dplyr::distinct(id, .keep_all = TRUE) # Remove duplicates by id
+
+    } else {
+
+      DF_ALL = DF_main |>
+        dplyr::bind_rows(NEW_songs) |>
+        dplyr::mutate(id_temp = paste0(id, id_paragraph)) |>
+        dplyr::distinct(id_temp, .keep_all = TRUE) |>  # Remove duplicates by id_temp
+        dplyr::select(-id_temp)
+
+    }
 
   }
 
@@ -301,20 +321,24 @@ return(DF_ALL)
 }
 
 
-update_main_DB <- function(DF_lyrics_new, DF_lyrics_current, filename_current_lyrics) {
+update_main_DB <- function(DF_new, DF_current, filename_current, what) {
 
-  if (!is.null(DF_lyrics_new)) {
+  if (!what %in% c("lyrics", "paragraphs")) cli::cli_abort("what SHOULD be either `lyrics` or `paragraphs`")
 
-    DF_updated = lyriclensR:::combine_new_songs(DF_main = DF_lyrics_current,
-                                                DF_new = DF_lyrics_new)
 
-    if (!identical(DF_lyrics_current, DF_updated)) {
+  if (!is.null(DF_new)) {
+
+    DF_updated = combine_new_songs(DF_main = DF_current,
+                                   DF_new = DF_new,
+                                   what = what)
+
+    if (!identical(DF_current, DF_updated)) {
 
       # Save new current file
-      data.table::fwrite(DF_updated, file = filename_current_lyrics)
-      cli::cli_alert_info("{nrow(DF_updated)} new lyrics")
+      data.table::fwrite(DF_updated, file = filename_current)
+      cli::cli_alert_info("{nrow(DF_updated)} new {what}")
 
-      paste0(nrow(DF_lyrics_new), " new lyrics")
+      paste0(nrow(DF_new), " new lyrics")
 
     }
 
@@ -324,10 +348,11 @@ update_main_DB <- function(DF_lyrics_new, DF_lyrics_current, filename_current_ly
 
 
   } else {
-    cli::cli_alert_info("NO new lyrics")
-    "NO new lyrics"
+    cli::cli_alert_info("NO {what} found")
+    DF_updated = NULL
   }
 
+  return(DF_updated)
 
 }
 
@@ -342,9 +367,16 @@ move_lyrics_to_processed <- function(lyrics_jsons, move_lyrics_file_to = NULL, .
     lyrics_jsons = lyrics_jsons[!lyrics_jsons == "inputs//README"]
 
     if (!dir.exists(move_lyrics_file_to)) cli::cli_abort("{here::here(move_lyrics_file_to)} does not exist")
-    OUT = paste0(move_lyrics_file_to, "/", basename(lyrics_jsons))
-    fs::file_move(lyrics_jsons, OUT)
-    # fs::file_copy(lyrics_file, OUT, overwrite = TRUE)
+    zip(zipfile = paste0(move_lyrics_file_to, "/processed_lyrics.zip"),
+        files = fs::as_fs_path(lyrics_jsons))
+
+
+
+    # OUT = paste0(move_lyrics_file_to, "/", basename(lyrics_jsons))
+    # fs::file_move(lyrics_jsons, OUT)
+
+    file.remove(lyrics_jsons)
+
   }
 }
 
@@ -362,10 +394,39 @@ read_DF_ALL <- function(filename_current, what) {
 
     # Get rid of the template file. We needed so tar_files_input(filename_current,... does not fail
     filename_clean = filename_current[filename_current != placeholder_file]#"outputs/DF_lyrics//DF_lyrics_ALL.template"]
-    data.table::fread(filename_clean) |> dplyr::mutate(release_date = as.character(release_date))
+
+    #### REVIEW ####
+
+    if (what == "paragraphs") {
+      DF_ALL_current = data.table::fread(filename_clean) |>
+        # as.integer(id) SHOULD not be there. fread reads it as character?
+        dplyr::mutate(id = as.integer(id),
+                      id_paragraph = as.integer(id_paragraph))
+    } else {
+      DF_ALL_current = data.table::fread(filename_clean) |>
+        # as.character(release_date) SHOULD not be there. We loose the date format at some point
+        dplyr::mutate(release_date = as.character(release_date))
+    }
 
   } else {
     NULL
   }
 
+  return(DF_ALL_current)
 }
+
+
+
+check_placeholder_files <- function() {
+
+  # WE NEED empty placeholder files in inputs, outputs/DF_lyrics and
+  # outputs/DF_paragraphs for tar_files_input() to work
+
+  if (!file.exists("inputs/README")) file.create("inputs/README")
+  if (!file.exists("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")) file.create("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")
+  if (!file.exists("outputs/DF_paragraphs/DF_paragraphs_ALL.placeholder")) file.create("outputs/DF_paragraphs/DF_paragraph_ALL.placeholder")
+
+  return("All placeholder files in place")
+
+}
+

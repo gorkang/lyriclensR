@@ -14,6 +14,7 @@
 #' @examples DF_paragraphs = separate_paragraphs(DF_ALL_es)
 separate_paragraphs <- function(DF_lyrics, daemons = 5, write_output = FALSE, filename_output = NULL, language = NULL) {
 
+  if (nrow(DF_lyrics) == 0) return(tibble::tibble())
 
   if (is.null(filename_output)) {
     filename_output = "outputs/DF_lyrics/DF_paragraphs.gz"
@@ -71,7 +72,7 @@ separate_paragraphs <- function(DF_lyrics, daemons = 5, write_output = FALSE, fi
     dplyr::summarise(N = dplyr::n(),
                      ids = paste(id_paragraph, collapse = ","),
                      .by = c(id, id_song_paragraph)) |>
-    filter(N > 1)
+    dplyr::filter(N > 1)
   # count(id_song_paragraph) |>
   # filter(n > 1)
 

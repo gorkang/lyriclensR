@@ -8,3 +8,5 @@
 ^venv$
 ^README\.Rmd$
 ^outputs$
+^_targets$
+^_targets\.R$
