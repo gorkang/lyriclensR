@@ -6,7 +6,7 @@ targets::tar_option_set(packages = c("tibble", "qs2", "lyriclensR"))
 # Run the R scripts in R/
 targets::tar_source()
 
-# WE NEED empty placeholder files in inputs, outputs/DF_lyrics and
+# WE NEED empty placeholder files in outputs/lyrics_to_process, outputs/DF_lyrics and
 # outputs/DF_paragraphs for tar_files_input() to work
 check_placeholder_files()
 
@@ -16,7 +16,7 @@ list(
   # Process NEW FILES --------------------------------------------------------
 
   # Input json files
-  tar_files_input(lyrics_jsons, list.files("inputs/", full.names = TRUE)),
+  tar_files_input(lyrics_jsons, list.files("outputs/lyrics_to_process/", full.names = TRUE)),
 
   # Create TEMP files with ALL input files
   tar_target(DF_lyrics_new, read_all_lyrics(lyrics_files = lyrics_jsons,
@@ -29,10 +29,12 @@ list(
   # CURRENT FILES -----------------------------------------------------------
 
   # Main processed lyrics file
+  # REVIEW: This way of getting filename_current_lyrics is a bit flimsy
   tar_files_input(filename_current_lyrics, list.files("outputs/DF_lyrics/", pattern = "DF_lyrics_ALL\\.", full.names = TRUE)),
   tar_target(DF_lyrics_current, read_DF_ALL(filename_current = filename_current_lyrics, what = "lyrics")),
 
   # Main processed paragraphs file
+  # REVIEW: This way of getting filename_current_paragraphs is a bit flimsy
   tar_files_input(filename_current_paragraphs, list.files("outputs/DF_paragraphs/", pattern = "DF_paragraphs_ALL\\.", full.names = TRUE)),
   tar_target(DF_paragraphs_current, read_DF_ALL(filename_current = filename_current_paragraphs, what = "paragraphs")),
 
@@ -55,7 +57,7 @@ list(
                                                    what = "paragraphs")),
   # Clean up json files
   tar_target(MOVED_jsons, move_lyrics_to_processed(lyrics_jsons,
-                                                   move_lyrics_file_to = "outputs/processed_lyrics/",
+                                                   move_lyrics_file_to = "outputs/lyrics_processed/",
                                                    DF_lyrics_updated))
 
 )

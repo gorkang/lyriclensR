@@ -1,7 +1,8 @@
 # Visualize pipeline
 targets::tar_visnetwork(label = "time", targets_only = TRUE)
 
-# Needs to run 2 times because all the inputs are moved to processed and the change in inputs is detected
+# Needs to run 2 times because all the outputs/lyrics_to_process/ are moved to
+# outputs/lyrics_processed/ and the change in outputs/lyrics_to_process/ is detected
 # We could change move_lyrics_to_processed() to avoid removing the input (?)
 targets::tar_make()
 targets::tar_make()

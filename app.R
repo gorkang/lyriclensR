@@ -1,20 +1,16 @@
 library(shiny)
-# library(DT)
-# library(data.table)
-# library(R.utils)
 
 invisible(lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source))
-filename = here::here("outputs/DF_lyrics/DF_lyrics_es.gz")
+filename = here::here("outputs/DF_lyrics/DF_lyrics_ALL.gz")
+# filename = here::here("outputs/DF_lyrics/DF_lyrics_es.gz")
 
 DF_ALL = data.table::fread(filename) |>
   dplyr::distinct(id, .keep_all = TRUE)
 
-# DF_ALL |> arrange(desc(pageviews)) |> select(artist)
-# ALL_artists = sort(unique(DF_ALL$artist))
 ALL_artists = DF_ALL |>
   dplyr::count(artist) |>
   dplyr::arrange(dplyr::desc(n)) |>
-  head(50) |>
+  head(100) |>
   # dplyr::filter(n > 20) |>
   dplyr::arrange(artist) |>
   dplyr::pull(artist)
@@ -96,7 +92,6 @@ server <- function(input, output) {
 
       search_words(
         lyrics = DATAFRAME(),
-        # data =  DF_ALL |> dplyr::filter(artist %in% input$artists),
         highlight_words = input$word,
         n_sentences_around = input$n_sentences_around)
 

@@ -28,6 +28,4 @@ download_individual_songs <- function(processed_spotify_list, min_s_wait = 5, ma
 
     })
 
-  move_downloaded_lyrics()
-
 }

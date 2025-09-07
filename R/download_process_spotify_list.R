@@ -23,8 +23,6 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
     dplyr::mutate(ctime = file.info(filename, extra_cols = TRUE)$ctime) |>
     dplyr::filter(ctime == max(ctime)) |> dplyr::pull(filename)
 
-  # LastFile = "outputs/DF/2025-07-30 15:44:50.544527 6UeSakyzhiEt4NB3UAd6NQ.csv"
-
   if (continue_after_error) {
     # IF DOWNLOAD fails, restart here
     Artistas_clean = list_not_downloaded_artists(input = LastFile,
@@ -44,13 +42,10 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
     download_all_artists(artists = c(OUT$ARTISTAS))
   }
 
-  # 4) Move to lyrics folder
-  cli::cli_h1("Move json files to output/lyrics")
-  move_downloaded_lyrics()
 
-  # 5) Process
+  # 4) Process
   cli::cli_h1("Process all lyrics")
-  lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)
+  lyrics = list.files("outputs/lyrics_to_process/", pattern = "json", full.names = TRUE)
 
   DF_ALL = read_all_lyrics(lyrics, write_output = TRUE)
 

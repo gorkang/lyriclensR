@@ -152,7 +152,10 @@ clean_words <- function(DF_words) {
 }
 
 
-list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/") {
+list_not_downloaded_artists <- function(input,
+                                        location_processed_jsons = "outputs/lyrics_processed/processed_lyrics.zip",
+                                        location_not_processed_jsons = "outputs/lyrics_to_process/") {
+
   # input = "outputs/DF/2025-07-30 07:18:27.301064 37i9dQZEVXbMDoHDwVN2tF.csv"
 
   if (grepl("\\.csv", input[1])) {
@@ -183,20 +186,44 @@ list_not_downloaded_artists <- function(input, location_jsons = "outputs/lyrics/
 
   ARTISTAS = DF_Artistas |> dplyr::pull(Artista_clean)
 
-  JSONs = gsub("Lyrics_(.*?)\\.json", "\\1", list.files(location_jsons, pattern = "json")) |>
-    tolower() |>
-    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')
+  # Unprocessed jsons
+  unprocessed_JSONs = parse_jsons_filenames(location_not_processed_jsons) |>
+    dplyr::mutate(clean_name = gsub(" ", "", gsub("(.*?) - .*", "\\1", name_found)) |>
+             tolower() |> iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
+    dplyr::pull(clean_name)
 
-  Artistas_missing =
+
+  # TODO: Adaptar a nuevo formato de outputs/lyrics_to_process/
+  # Conviviran ambos formatos por un tiempo. case_when!
+  JSONs = zip::zip_list(location_processed_jsons) |>
+    dplyr::mutate(json_name = gsub("Lyrics_", "", tools::file_path_sans_ext(basename(filename)))) |>
+    dplyr::select(json_name) |>
+    dplyr::filter(!grepl("^lyrics", json_name)) |>
+    dplyr::mutate(name = snakecase::to_title_case(json_name) |>
+                    tolower() |>
+                    trimws() |>
+                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
+    dplyr::mutate(name = gsub(" ", "", name)) |>
+    dplyr::pull(name)
+
+  not_in_processed =
     DF_Artistas |>
     dplyr::filter(Artista_clean %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
     dplyr::pull(Artista)
 
-  return(Artistas_missing)
+  not_in_unprocessed =
+    DF_Artistas |>
+    dplyr::filter(Artista_clean %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::pull(Artista)
+
+  OUT = list(not_in_processed = not_in_processed,
+             not_in_unprocessed = not_in_unprocessed)
+
+  return(OUT)
 }
 
 
-download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20) {
+download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20, message_when_finished = FALSE) {
 
   seq_along(artists) |>
     purrr::walk(~{
@@ -206,7 +233,10 @@ download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20) {
       return(OUT)
     })
 
-  move_downloaded_lyrics()
+  if (message_when_finished) {
+    if (!require('ntfy')) remotes::install_github("jonocarroll/ntfy"); library('ntfy')
+    ntfy::ntfy_send(paste0(Sys.Date(), ": lyriclensR: All New Artists downloaded"))
+  }
 
 }
 
@@ -239,33 +269,6 @@ song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics
   return(DF_out)
 
 }
-
-move_downloaded_lyrics <- function() {
-
-  downloaded = list.files(".", pattern = "json", full.names = TRUE)
-
-  # NUM = stringr::str_count(downloaded, pattern = "_")
-  #
-  # if (length(NUM) == 0) return(NULL)
-  #
-  #
-  # # 1 "_" is a full artist, 2 "_" is a specific song
-  # if (all(NUM == 1)) {
-  #   destination = paste0("outputs/lyrics/", basename(downloaded))
-  # } else if (all(NUM == 2)) {
-  #   destination = paste0("outputs/lyrics_individual_songs/", basename(downloaded))
-  # } else {
-  #   cli::cli_abort("The number of '_' is not 1 or 2: {downloaded}")
-  # }
-
-  destination = paste0("inputs/", basename(downloaded))
-
-
-  file.rename(from = downloaded,
-              to = destination)
-
-}
-
 
 
 save_experiment_materials <- function(DF_paragraphs, sample_n, filename_output = "stimuli.js") {
@@ -359,15 +362,15 @@ update_main_DB <- function(DF_new, DF_current, filename_current, what) {
 
 move_lyrics_to_processed <- function(lyrics_jsons, move_lyrics_file_to = NULL, ...) {
 
-  if (length(lyrics_jsons) == 1 & lyrics_jsons[1] == "inputs//README") return(NULL)
+  if (length(lyrics_jsons) == 1 & lyrics_jsons[1] == "outputs/lyrics_to_process//README") return(NULL)
 
   # If not null, move json file to destination
   if (!is.null(move_lyrics_file_to) & !is.null(lyrics_jsons)) {
 
-    lyrics_jsons = lyrics_jsons[!lyrics_jsons == "inputs//README"]
+    lyrics_jsons = lyrics_jsons[!lyrics_jsons == "outputs/lyrics_to_process//README"]
 
     if (!dir.exists(move_lyrics_file_to)) cli::cli_abort("{here::here(move_lyrics_file_to)} does not exist")
-    zip(zipfile = paste0(move_lyrics_file_to, "/processed_lyrics.zip"),
+    zip(zipfile = paste0(move_lyrics_file_to, "/lyrics_processed.zip"),
         files = fs::as_fs_path(lyrics_jsons))
 
 
@@ -419,14 +422,25 @@ read_DF_ALL <- function(filename_current, what) {
 
 check_placeholder_files <- function() {
 
-  # WE NEED empty placeholder files in inputs, outputs/DF_lyrics and
+  # WE NEED empty placeholder files in outputs/lyrics_to_process, outputs/DF_lyrics and
   # outputs/DF_paragraphs for tar_files_input() to work
 
-  if (!file.exists("inputs/README")) file.create("inputs/README")
+  if (!file.exists("outputs/lyrics_to_process/README")) file.create("outputs/lyrics_to_process/README")
   if (!file.exists("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")) file.create("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")
   if (!file.exists("outputs/DF_paragraphs/DF_paragraphs_ALL.placeholder")) file.create("outputs/DF_paragraphs/DF_paragraph_ALL.placeholder")
 
   return("All placeholder files in place")
 
+}
+
+
+parse_jsons_filenames <- function(jsons_filenames) {
+
+  DF = tibble::tibble(filename = list.files(jsons_filenames, pattern = "json")) |>
+    tidyr::separate(filename, into = c("search", "rest"), sep = " - ") |>
+    tidyr::separate(rest, into = c("name_found", "id", "n", "date"), sep = "_") |>
+    dplyr::mutate(date = gsub("\\.json", "", date))
+
+  return(DF)
 }
 

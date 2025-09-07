@@ -1,3 +1,8 @@
+# lyriclensR 0.0.7
+
+* save jsons in input folder: outputs/lyrics_processed
+* json names include searched author, found author, id, num songs and date
+
 # lyriclensR 0.0.6
 
 Major updates

@@ -12,23 +12,17 @@
 #' @returns A DT table
 #' @export
 #'
-#' @examples  search_words(lyrics = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
+#' @examples  search_words(lyrics = "outputs/lyrics_to_process/Lyrics_Tool.json", highlight_words = "amor")
 search_words <- function(lyrics, highlight_words, n_sentences_around = 2) {
 
-  # filename = here::here("outputs/DF_lyrics/DF_lyrics.gz")
+  # filename = here::here("outputs/DF_lyrics/DF_lyrics_es.gz")
   # lyrics = data.table::fread(filename)
 
-  # lyrics = "outputs/lyrics/Lyrics_MykeTowers.json"
-  # highlight_words = "culo"
+  # lyrics = "outputs/lyrics_to_process/Lyrics_Tool.json"
+  # FILE_in_zip = unzip("outputs/lyrics_processed/processed_lyrics.zip", files = lyrics)
+  # DF = lyriclensR:::read_lyrics(FILE_in_zip)
+  # highlight_words = "love"
   # n_sentences_around = 1
-
-  # highlight_words  = "Chinga tan rico"
-
-  # Dei V & Omar Courtz. Amber
-  # Chinga tan rico, que a vece' pienso que hasta la amé
-
-
-  # set.seed(12)
 
   # Read json or use DF
   if (is.data.frame(lyrics)) {
@@ -47,7 +41,7 @@ search_words <- function(lyrics, highlight_words, n_sentences_around = 2) {
     dplyr::mutate(
       year = ifelse(!is.na(release_date), format(as.Date(release_date, format="%Y-%m-%d"),"%Y"), "?"),
       ID_temp = paste0(artists, "<BR><BR>", title, "<BR><BR>(", year, ")"),
-      Song = paste0("<a href='", link, "', target = '_blank'>", ID_temp, "</a>"),
+      Song = paste0(id, "<BR><BR><a href='", link, "', target = '_blank'>", ID_temp, "</a>"),
       Lyrics = stringr::str_replace_all(lyrics, "\\n", "<br>")
     ) |>
     dplyr::select(id, Song, Lyrics)
@@ -104,13 +98,15 @@ search_words <- function(lyrics, highlight_words, n_sentences_around = 2) {
   TABLE = DF_table |>
     dplyr::select(-id) |>
     DT::datatable(
+      extensions = 'Buttons',
       escape = FALSE,
       filter = "top",
       rownames = FALSE,
       options = list(pageLength = 20,
-                     dom = 'tip',
+                     dom = 'Btip', # B is the button
                      columnDefs = list(list(width = '200px', targets = 0)),
-                     className = 'dt-center')
+                     className = 'dt-center',
+                     buttons = c('copy', 'csv'))
       ) |>
     DT::formatStyle(columns = c(2), fontSize = '150%') |>
     DT::formatStyle(columns = c(1), 'vertical-align'='top') |>

@@ -1,9 +1,8 @@
-#' process_all_lyrics
+#' process_new_lyrics
+#' Read lyrics in  "outputs/lyrics_to_process/" and combine them with full lyrics
 #'
-#' @param folder_lyrics_artists Location of json files for full artists
-#' @param folder_lyrics_songs Location of json files for songs
-#' @param daemons_artists cores to process artists json lyrics
-#' @param daemons_songs cores to process songs json lyrics
+#' @param folder_lyrics Location of json files
+#' @param daemons cores to process json lyrics
 #' @param write_output TRUE/FALSE
 #' @param filename_output Name of output file
 #' @param language Filter by language? Most common: en, es, fr, pt, ko
@@ -11,10 +10,9 @@
 #' @returns A DF with all artits and individual songs
 #' @export
 #'
-#' @examples process_all_lyrics(write_output = TRUE)
-process_all_lyrics <- function(folder_lyrics_artists = "outputs/lyrics/",
-                               folder_lyrics_songs = "outputs/lyrics_individual_songs/",
-                               daemons_artists = 10, daemons_songs = 5,
+#' @examples process_new_lyrics(write_output = TRUE)
+process_new_lyrics <- function(folder_lyrics = "outputs/lyrics_to_process/",
+                               daemons = 10,
                                write_output = FALSE, filename_output = NULL,
                                language = NULL) {
 
@@ -26,19 +24,19 @@ process_all_lyrics <- function(folder_lyrics_artists = "outputs/lyrics/",
   }
 
   # Location of json files
-  lyrics_artists = list.files(folder_lyrics_artists, pattern = "json", full.names = TRUE)
-  lyrics_songs   = list.files(folder_lyrics_songs, pattern = "json", full.names = TRUE)
+  lyrics_files = list.files(folder_lyrics, pattern = "json", full.names = TRUE)
 
 
-  cli::cli_alert_info("Processing {length(lyrics_artists)} artists and {length(lyrics_songs)} songs. This  will take a minute.")
+  cli::cli_alert_info("Processing {length(lyrics_files)} files. This  will take a minute.")
 
+  # Current full DF
+  DF_current = data.table::fread("outputs/DF_lyrics/DF_lyrics_ALL.gz")
 
   # Read all files
-  DF_ALL_artists = read_all_lyrics(lyrics_files = lyrics_artists, write_output = FALSE, daemons = daemons_artists)
-  DF_ALL_songs = read_all_lyrics(lyrics_files = lyrics_songs, write_output = FALSE, daemons = daemons_songs)
+  DF_new = read_all_lyrics(lyrics_files = lyrics_files, write_output = FALSE, daemons = daemons)
 
   # Combine only new songs and output unique songs
-  DF_ALL = combine_new_songs(DF_main = DF_ALL_artists, DF_new = DF_ALL_songs)
+  DF_ALL = combine_new_songs(DF_main = DF_current, DF_new = DF_new, what = "lyrics")
 
 
   # When language is set, check it exists, filter for that language, and change output name
@@ -61,7 +59,7 @@ process_all_lyrics <- function(folder_lyrics_artists = "outputs/lyrics/",
   # Write
   if (write_output) {
     if (!dir.exists(dirname(filename_output))) dir.create(dirname(filename_output))
-    data.table::fwrite(DF, file = filename_output, nThread = daemons_songs)
+    data.table::fwrite(DF, file = filename_output, nThread = daemons)
   }
 
   return(DF)

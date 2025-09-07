@@ -18,5 +18,5 @@ A wordcloud image
 create_wordcloud
 }
 \examples{
-create_wordcloud(lyrics = "outputs/lyrics/Lyrics_TaylorSwift.json")
+create_wordcloud(lyrics = "outputs/lyrics_to_process/Lyrics_TaylorSwift.json")
 }

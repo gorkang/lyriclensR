@@ -9,7 +9,7 @@
 #' @returns A wordcloud image
 #' @export
 #'
-#' @examples create_wordcloud(lyrics = "outputs/lyrics/Lyrics_TaylorSwift.json")
+#' @examples create_wordcloud(lyrics = "outputs/lyrics_to_process/Lyrics_TaylorSwift.json")
 create_wordcloud <- function(lyrics, ngram = 1) {
 
   # Read json or use DF

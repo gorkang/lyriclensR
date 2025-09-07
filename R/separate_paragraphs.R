@@ -1,9 +1,9 @@
 #' separate_paragraphs
-#' Separates a DF created with process_all_lyrics() into individual paragraphs
+#' Separates a DF created with process_new_lyrics() into individual paragraphs
 #' and cleans the paragraphs
 #'
 #' @param DF_lyrics DF_lyrics dataframe
-#' @param daemons a DF created with process_all_lyrics()
+#' @param daemons a DF created with process_new_lyrics()
 #' @param write_output TRUE/FALSE
 #' @param filename_output Name of the output file
 #' @param language es, en, ...

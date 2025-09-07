@@ -20,5 +20,5 @@ A DT table
 search_words
 }
 \examples{
- search_words(lyrics = "outputs/lyrics/Lyrics_MykeTowers.json", highlight_words = "amor")
+ search_words(lyrics = "outputs/lyrics_to_process/Lyrics_Tool.json", highlight_words = "amor")
 }

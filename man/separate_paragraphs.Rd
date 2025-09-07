@@ -3,7 +3,7 @@
 \name{separate_paragraphs}
 \alias{separate_paragraphs}
 \title{separate_paragraphs
-Separates a DF created with process_all_lyrics() into individual paragraphs
+Separates a DF created with process_new_lyrics() into individual paragraphs
 and cleans the paragraphs}
 \usage{
 separate_paragraphs(
@@ -17,7 +17,7 @@ separate_paragraphs(
 \arguments{
 \item{DF_lyrics}{DF_lyrics dataframe}
 
-\item{daemons}{a DF created with process_all_lyrics()}
+\item{daemons}{a DF created with process_new_lyrics()}
 
 \item{write_output}{TRUE/FALSE}
 
@@ -30,7 +30,7 @@ A DF with paragraphs
 }
 \description{
 separate_paragraphs
-Separates a DF created with process_all_lyrics() into individual paragraphs
+Separates a DF created with process_new_lyrics() into individual paragraphs
 and cleans the paragraphs
 }
 \examples{

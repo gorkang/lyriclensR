@@ -1,6 +1,6 @@
 Package: lyriclensR
 Title: Functions to Work With Lyrics
-Version: 0.0.6
+Version: 0.0.7
 Authors@R: 
     person("Gorka", "Navarrete", , "gorkang@gmail.com", role = c("aut", "cre"))
 Description: Helps get lyrics, separate words, plot wordclouds, etc.
@@ -15,6 +15,7 @@ Suggests:
   DT,
   ggplot2,
   purrr,
+  rvest,
   stringr,
   tidyr,
   wordcloud2

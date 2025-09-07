@@ -2,7 +2,7 @@
 # Load all ----------------------------------------------------------------
 
 # pak::local_install()
-# library(lyriclensR)
+library(lyriclensR)
 devtools::load_all()
 
 
@@ -14,8 +14,8 @@ devtools::load_all()
 
 # Process all lyrics ------------------------------------------------------
 
-  DF_ALL_es = process_all_lyrics(write_output = TRUE, language = "es")
-  DF_ALL = process_all_lyrics(write_output = TRUE)
+  DF_ALL_es = process_new_lyrics(write_output = TRUE, language = "es")
+  DF_ALL = process_new_lyrics(write_output = TRUE)
 
 
 
@@ -58,13 +58,10 @@ devtools::load_all()
     Artists_clean = list_not_downloaded_artists(input = Artists_manual)
 
   # 3) Download all artists Lyrics
-    download_all_artists(Artists_clean)
-
-  # 4) Move
-    move_downloaded_lyrics()
+    download_all_artists(Artists_clean, message_when_finished = TRUE)
 
   # 5) Process
-    lyrics = list.files("outputs/lyrics/", pattern = "json", full.names = TRUE)
+    lyrics = list.files("outputs/lyrics_to_process/", pattern = "json", full.names = TRUE)
     DF_ALL = read_all_lyrics(lyrics, write_output = TRUE)
 
 
@@ -72,7 +69,7 @@ devtools::load_all()
 # Search words ------------------------------------------------------------
 
   # Using json of a single Artist created by read_lyrics()
-  search_words(lyrics = "outputs/lyrics/Lyrics_Tool.json",
+  search_words(lyrics = "outputs/lyrics_to_process/Lyrics_Tool.json",
                highlight_word = "love")
 
   # Using big DF with all lyrics created by read_all_lyrics()
@@ -84,7 +81,7 @@ devtools::load_all()
 
 # Create wordcloud --------------------------------------------------------
 
-  lyrics_file = "outputs/lyrics/Lyrics_Tool.json"
+  lyrics_file = "outputs/lyrics_to_process/Lyrics_Tool.json"
   create_wordcloud(lyrics = lyrics_file)
   create_wordcloud(lyrics = dplyr::slice_sample(DF_ALL, n = 1000))
 
