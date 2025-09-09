@@ -8,7 +8,9 @@ targets::tar_make()
 targets::tar_make()
 
 # Load all objects (takes a while!)
-targets::tar_load_everything()
+# targets::tar_load_everything()
+targets::tar_load("DF_lyrics_current")
+targets::tar_load("DF_lyrics_new")
 
 # Check size of DFs
 nrow(DF_lyrics_new)
@@ -22,3 +24,4 @@ nrow(DF_paragraphs_updated)
 
 # Invalidate
 # targets::tar_invalidate(DF_paragraphs_current)
+# targets::tar_destroy()
