@@ -21,4 +21,4 @@ def py_download_full_discography(name_artist):
   
   #Save
   print("Saving: " + str(name_artist) + " in " + str(name_output))
-  artist.save_lyrics(name_output, sanitize = False) # sanitize FALSE so does not delete "/"
+  artist.save_lyrics(name_output, sanitize = False, overwrite = True) # sanitize FALSE so does not delete "/"

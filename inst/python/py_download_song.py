@@ -23,4 +23,4 @@ def py_download_song(name_artist, name_song):
 
   # Save
   print("Saving '" + str(name_song) + " - " + str(name_artist) + "'" + " in " + str(name_output))
-  song.save_lyrics(name_output, sanitize = False) # sanitize FALSE so does not delete
+  song.save_lyrics(name_output, sanitize = False, overwrite=True) # sanitize FALSE so does not delete "/"
