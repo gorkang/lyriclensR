@@ -181,70 +181,50 @@ list_not_downloaded_artists <- function(input,
   }
 
   DF_Artistas = DF_temp |>
-    dplyr::mutate(clean_name = gsub(" ", "", Artista) |>
-                    tolower() |>
-                    trimws() |>
-                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT'),
-                  clean_name = gsub("/", "", clean_name)) |>
-    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
-    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
+    dplyr::mutate(clean_name = create_clean_names(Artista)) |>
     dplyr::arrange(Artista)
 
+  input_ARTISTS = DF_Artistas |> dplyr::pull(clean_name)
 
-
-  ARTISTAS = DF_Artistas |> dplyr::pull(clean_name)
 
   # Unprocessed jsons
-  unprocessed_JSONs = parse_jsons_filenames(location_not_processed_jsons) |>
-    dplyr::mutate(clean_name = gsub(" ", "", gsub("(.*?) - .*", "\\1", name_found)) |>
-                    tolower() |>
-                    trimws() |>
-                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
-    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
-    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
-    dplyr::pull(clean_name)
+  names_jsons_clean = parse_jsons_filenames(location_not_processed_jsons)$name_found
+  unprocessed_JSONs = create_clean_names(names_jsons_clean)
 
 
-  # TODO: Adaptar a nuevo formato de outputs/lyrics_to_process/
-  # Conviviran ambos formatos por un tiempo. case_when!
-  JSONs = zip::zip_list(location_processed_jsons) |>
-    dplyr::mutate(json_name =
-                    dplyr::case_when(
-                      grepl("Lyrics_", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE) ~ gsub("Lyrics_", "", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE),
-                      TRUE ~ gsub("(.*) - .*", "\\1", tools::file_path_sans_ext(basename(filename))))) |>
-    dplyr::select(json_name) |>
+  # Processed jsons
+  processed_JSONs = zip::zip_list(location_processed_jsons) |>
+    # Reads processed.zip and extracts artist name for the old JSON format and the new one
+    dplyr::transmute(json_name =
+                       dplyr::case_when(
+                         grepl("Lyrics_", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE) ~ gsub("Lyrics_", "", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE),
+                         TRUE ~ gsub("(.*) - .*", "\\1", tools::file_path_sans_ext(basename(filename))))) |>
+    # Avoid individual songs
     dplyr::filter(!grepl("^lyrics", json_name)) |>
-    dplyr::mutate(clean_name = snakecase::to_title_case(json_name) |>
-                    tolower() |>
-                    trimws() |>
-                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
-    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
-    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
-
-
-    dplyr::mutate(clean_name = gsub(" ", "", clean_name)) |>
-
+    dplyr::mutate(clean_name = create_clean_names(json_name)) |>
     # REVIEW: Transition to new jsons!
-    dplyr::mutate(clean_name = gsub("[0-9]", "", clean_name)) |>
-
+    # dplyr::mutate(clean_name = gsub("[0-9]", "", clean_name)) |>
     dplyr::pull(clean_name)
+
+
+  # Prepare outputs
 
   not_in_processed =
     DF_Artistas |>
-    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
+    dplyr::filter(clean_name %in% input_ARTISTS[!input_ARTISTS %in% processed_JSONs]) |>
     dplyr::distinct(clean_name, .keep_all = TRUE) |>
     dplyr::pull(Artista)
 
   not_in_unprocessed =
     DF_Artistas |>
-    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::filter(clean_name %in% input_ARTISTS[!input_ARTISTS %in% unprocessed_JSONs]) |>
     dplyr::distinct(clean_name, .keep_all = TRUE) |>
     dplyr::pull(Artista)
 
   not_anywhere =
     DF_Artistas |>
-    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
-    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::filter(clean_name %in% input_ARTISTS[!input_ARTISTS %in% processed_JSONs]) |>
+    dplyr::filter(clean_name %in% input_ARTISTS[!input_ARTISTS %in% unprocessed_JSONs]) |>
     dplyr::distinct(clean_name, .keep_all = TRUE) |>
     dplyr::pull(Artista)
 
@@ -469,7 +449,7 @@ check_placeholder_files <- function() {
 
 
 parse_jsons_filenames <- function(jsons_filenames) {
-
+  # Works for new format
   DF = tibble::tibble(filename = list.files(jsons_filenames, pattern = "json")) |>
     tidyr::separate(filename, into = c("search", "rest"), sep = " - ") |>
     tidyr::separate(rest, into = c("name_found", "id", "n", "date"), sep = "_") |>
@@ -478,3 +458,30 @@ parse_jsons_filenames <- function(jsons_filenames) {
   return(DF)
 }
 
+create_clean_names <- function(dirty_names) {
+
+  # We get rid of numbers. Too much?
+
+  names_to_clean = dirty_names |> tolower() |> trimws() |>
+    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')
+
+  # Things we clean with gsub()
+  replacements =
+    c(" "            = "",
+      "/"            = "",
+      "[\\.-\\']"    = "",
+      "[[:punct:]]"  = "")
+
+  # Apply gsub to a vector
+  TEMP =
+    Reduce(
+    f = function(vec, i) {
+      gsub(names(replacements)[i], replacements[i], vec)
+      },
+    x = seq_along(replacements),
+    init = names_to_clean
+    )
+
+
+  return(TEMP)
+}
