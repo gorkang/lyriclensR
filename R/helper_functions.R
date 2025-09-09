@@ -32,10 +32,10 @@ read_lyrics <- function(lyrics_file) {
           release_date = DF$songs[[.x]]$release_date,
           pageviews = DF$songs[[.x]]$stats$pageviews,
           lyrics_state = DF$songs[[.x]]$lyrics_state,
-          artist = DF$songs[[.x]]$artist,
-          artists = DF$songs[[.x]]$artist_names,
+          artist = gsub('"', "'", DF$songs[[.x]]$artist),
+          artists = gsub('"', "'", DF$songs[[.x]]$artist_names),
           title =  DF$songs[[.x]]$title,
-          lyrics_raw = as.character(DF$songs[[.x]]$lyrics),
+          lyrics_raw = gsub('"', "'", as.character(DF$songs[[.x]]$lyrics)),
           lyrics = gsub(".*?Lyrics.*?\\n(.*)", "\\1", lyrics_raw),
           link = paste0("https://genius.com", DF$songs[[.x]]$path)
         )
@@ -153,7 +153,7 @@ clean_words <- function(DF_words) {
 
 
 list_not_downloaded_artists <- function(input,
-                                        location_processed_jsons = "outputs/lyrics_processed/processed_lyrics.zip",
+                                        location_processed_jsons = "outputs/lyrics_processed/lyrics_processed.zip",
                                         location_not_processed_jsons = "outputs/lyrics_to_process/") {
 
   # input = "outputs/DF/2025-07-30 07:18:27.301064 37i9dQZEVXbMDoHDwVN2tF.csv"
@@ -177,47 +177,81 @@ list_not_downloaded_artists <- function(input,
       dplyr::arrange(Artista)
 
   } else {
-    DF_temp = tibble::tibble(Artista = input)
+    DF_temp = tibble::tibble(Artista = unlist(input))
   }
 
   DF_Artistas = DF_temp |>
-    dplyr::mutate(Artista_clean = gsub(" ", "", Artista) |> tolower() |> iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT'),
-                  Artista_clean = gsub("/", "", Artista_clean))
+    dplyr::mutate(clean_name = gsub(" ", "", Artista) |>
+                    tolower() |>
+                    trimws() |>
+                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT'),
+                  clean_name = gsub("/", "", clean_name)) |>
+    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
+    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
+    dplyr::arrange(Artista)
 
-  ARTISTAS = DF_Artistas |> dplyr::pull(Artista_clean)
+
+
+  ARTISTAS = DF_Artistas |> dplyr::pull(clean_name)
 
   # Unprocessed jsons
   unprocessed_JSONs = parse_jsons_filenames(location_not_processed_jsons) |>
     dplyr::mutate(clean_name = gsub(" ", "", gsub("(.*?) - .*", "\\1", name_found)) |>
-             tolower() |> iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
+                    tolower() |>
+                    trimws() |>
+                    iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
+    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
+    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
     dplyr::pull(clean_name)
 
 
   # TODO: Adaptar a nuevo formato de outputs/lyrics_to_process/
   # Conviviran ambos formatos por un tiempo. case_when!
   JSONs = zip::zip_list(location_processed_jsons) |>
-    dplyr::mutate(json_name = gsub("Lyrics_", "", tools::file_path_sans_ext(basename(filename)))) |>
+    dplyr::mutate(json_name =
+                    dplyr::case_when(
+                      grepl("Lyrics_", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE) ~ gsub("Lyrics_", "", tools::file_path_sans_ext(basename(filename)), ignore.case = TRUE),
+                      TRUE ~ gsub("(.*) - .*", "\\1", tools::file_path_sans_ext(basename(filename))))) |>
     dplyr::select(json_name) |>
     dplyr::filter(!grepl("^lyrics", json_name)) |>
-    dplyr::mutate(name = snakecase::to_title_case(json_name) |>
+    dplyr::mutate(clean_name = snakecase::to_title_case(json_name) |>
                     tolower() |>
                     trimws() |>
                     iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')) |>
-    dplyr::mutate(name = gsub(" ", "", name)) |>
-    dplyr::pull(name)
+    dplyr::mutate(clean_name = gsub("[\\.-\\']", "", clean_name)) |>
+    dplyr::mutate(clean_name = gsub("[[:punct:]]", "", clean_name)) |>
+
+
+    dplyr::mutate(clean_name = gsub(" ", "", clean_name)) |>
+
+    # REVIEW: Transition to new jsons!
+    dplyr::mutate(clean_name = gsub("[0-9]", "", clean_name)) |>
+
+    dplyr::pull(clean_name)
 
   not_in_processed =
     DF_Artistas |>
-    dplyr::filter(Artista_clean %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
+    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
+    dplyr::distinct(clean_name, .keep_all = TRUE) |>
     dplyr::pull(Artista)
 
   not_in_unprocessed =
     DF_Artistas |>
-    dplyr::filter(Artista_clean %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::distinct(clean_name, .keep_all = TRUE) |>
     dplyr::pull(Artista)
 
+  not_anywhere =
+    DF_Artistas |>
+    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% JSONs]) |>
+    dplyr::filter(clean_name %in% ARTISTAS[!ARTISTAS %in% unprocessed_JSONs]) |>
+    dplyr::distinct(clean_name, .keep_all = TRUE) |>
+    dplyr::pull(Artista)
+
+
   OUT = list(not_in_processed = not_in_processed,
-             not_in_unprocessed = not_in_unprocessed)
+             not_in_unprocessed = not_in_unprocessed,
+             not_anywhere = not_anywhere)
 
   return(OUT)
 }
@@ -412,7 +446,7 @@ read_DF_ALL <- function(filename_current, what) {
     }
 
   } else {
-    NULL
+    DF_ALL_current = NULL
   }
 
   return(DF_ALL_current)
