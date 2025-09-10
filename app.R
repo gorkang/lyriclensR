@@ -1,4 +1,12 @@
-library(shiny)
+if (!require('shiny')) install.packages('shiny'); library('shiny')
+if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+if (!require('DT')) install.packages('DT'); library('DT')
+if (!require('stringr')) install.packages('stringr'); library('stringr')
+if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
+if (!require('here')) install.packages('here'); library('here')
+if (!require('data.table')) install.packages('data.table'); library('data.table')
+if (!require('R.utils')) install.packages('R.utils'); library('R.utils')
+
 
 invisible(lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source))
 filename = here::here("outputs/DF_lyrics/DF_lyrics_ALL.gz")

@@ -1,3 +1,5 @@
+# Get music lists with top Hits
+
 # El portal de musica -----------------------------------------------------
 
   # Main source 2009-2024
@@ -46,3 +48,28 @@ ARTISTS = ALL_artists |> dplyr::distinct(artists)
 
 ALL |> readr::write_csv("outputs/song_lists/DF_elportaldemusica_2009-2024.csv")
 ARTISTS |> readr::write_csv("outputs/song_lists/elportaldemusica_artists_2009-2024.csv")
+
+
+
+
+# Los 40 principales ------------------------------------------------------
+
+# 2024:
+#   - https://open.spotify.com/intl-es/album/0u7U1gJ3AdW9WJLw4Uok41
+
+# 2023:
+#   - https://open.spotify.com/intl-es/album/5fl9rZ0t8V1qfgPvQR1Qma
+
+# 2022:
+#   - https://open.spotify.com/intl-es/album/1H2TYroUcGOyZpjtfeX3pd?go=1&nd=1&dlsi=73cfabc7dd844ff2
+
+# 2021:
+#   - https://open.spotify.com/intl-es/album/5S0axnA4nLMK6Vsc5tlH30
+
+# 2019:
+#   - https://open.spotify.com/intl-es/album/579orUP3c1qnjExoqh7Rd5
+
+# 2016:
+#   - https://open.spotify.com/intl-es/album/00PkuYKHhLVnislnJUMhKe
+
+

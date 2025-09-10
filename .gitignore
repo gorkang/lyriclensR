@@ -4,6 +4,7 @@
 .RData
 .Ruserdata
 admin/
-DEV/
+dev/
 rsconnect/
 venv/
+_targets/

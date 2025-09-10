@@ -1,0 +1,14 @@
+outputs/lyrics_processed/
+outputs/lyrics_to_processed/
+outputs/song_lists/
+outputs/zips/
+outputs/www/
+outputs/DF/
+rsconnect/
+_targets/
+admin/
+venv/
+.git/
+inst/
+dev/
+man/
