@@ -1,3 +1,8 @@
+# lyriclensR 0.0.8
+
+* Creating list of HITS
+* Creating a HITS_combined DF with found and not found hits
+
 # lyriclensR 0.0.7
 
 * save jsons in input folder: outputs/lyrics_processed

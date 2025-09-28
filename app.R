@@ -103,7 +103,9 @@ server <- function(input, output) {
         highlight_words = input$word,
         n_sentences_around = input$n_sentences_around)
 
-  })
+  }) |>
+    # Avoid searching after slow keystrokes
+    shiny::debounce(1000)
 
 
   output$songs = renderText({

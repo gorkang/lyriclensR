@@ -40,6 +40,18 @@ list(
 
 
 
+  # HITS --------------------------------------------------------------------
+  tar_files_input(HITS_files, list.files("outputs/DF/", full.names = TRUE)),
+  tar_target(raw_HITS_spotify, process_spotify_HITS(HITS_files)),
+
+  tar_target(DF_HITS_raw, read_raw_hits(raw_HITS_spotify)),
+  tar_target(DF_HITS_clean, clean_hits(DF_HITS_raw)),
+  tar_target(DF_lyrics_current_CLEAN, clean_lyrics_current(DF_lyrics_current)),
+
+  tar_target(DF_HITS_combined, combine_HITS_lyrics(DF_lyrics_current_CLEAN, DF_HITS_clean, DF_HITS_raw)),
+
+
+
   # UPDATE ------------------------------------------------------------------
 
   # Update main lyrics file if there are new lyrics

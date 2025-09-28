@@ -458,30 +458,57 @@ parse_jsons_filenames <- function(jsons_filenames) {
   return(DF)
 }
 
-create_clean_names <- function(dirty_names) {
+create_clean_names <- function(dirty_names, eliminate_parenthesis = FALSE) {
 
+  # dirty_names = "Que Nadie (E-Single)"
   # We get rid of numbers. Too much?
 
-  names_to_clean = dirty_names |> tolower() |> trimws() |>
+  if (eliminate_parenthesis) {
+    # This makes impossible to differentiate between x AND x (remix)
+    dirty_names2 = gsub("\\s*\\([^\\)]+\\)", "", dirty_names)
+  } else {
+    dirty_names2 = dirty_names
+  }
+
+  names_to_clean = dirty_names2 |> tolower() |> trimws() |>
     iconv(from = 'UTF-8', to = 'ASCII//TRANSLIT')
 
-  # Things we clean with gsub()
-  replacements =
-    c(" "            = "",
-      "/"            = "",
-      "[\\.-\\']"    = "",
-      "[[:punct:]]"  = "")
+  TEMP = gsub("[^[:alnum:]]", "", names_to_clean)
 
-  # Apply gsub to a vector
-  TEMP =
-    Reduce(
-    f = function(vec, i) {
-      gsub(names(replacements)[i], replacements[i], vec)
-      },
-    x = seq_along(replacements),
-    init = names_to_clean
-    )
+  # Things we clean with gsub()
+  # replacements =
+  #   c(" "            = "",
+  #     "/"            = "",
+  #     "[\\.-\\']"    = "",
+  #     "[[:punct:]]"  = "")
+  #
+  # # Apply gsub to a vector
+  # TEMP =
+  #   Reduce(
+  #   f = function(vec, i) {
+  #     gsub(names(replacements)[i], replacements[i], vec)
+  #     },
+  #   x = seq_along(replacements),
+  #   init = names_to_clean
+  #   )
 
 
   return(TEMP)
+}
+
+
+proportion_found <- function(DF_HITS_clean, DF_HITS_raw, DF_HITS_combined_NOT_found) {
+  # targets::tar_load(c("DF_HITS_raw", "DF_HITS_clean"))
+
+  TOTAL_raw = DF_HITS_clean |> nrow()
+  EXPLICIT_extra = DF_HITS_raw |> dplyr::filter(grepl("Explicit", source)) |> nrow()
+  TOTAL_clean = TOTAL_raw - EXPLICIT_extra
+  NOT_found = DF_HITS_combined_NOT_found |> nrow()
+  FOUND = TOTAL_clean - NOT_found
+
+  DF = tibble::tibble(total_HITS = TOTAL_clean, found = FOUND, not_found = NOT_found) |>
+    dplyr::mutate(PCT_found = found/total_HITS)
+
+  print(DF)
+
 }
