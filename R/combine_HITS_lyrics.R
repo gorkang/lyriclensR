@@ -1,10 +1,10 @@
-combine_HITS_lyrics <- function(DF_lyrics_current_CLEAN, DF_HITS_clean, DF_HITS_raw) {
+match_HITS_lyrics <- function(DF_lyrics_current_DICC, DF_HITS_clean, DF_HITS_raw) {
 
-  # targets::tar_load(c("DF_lyrics_current_CLEAN", "DF_HITS_clean"))
+  # targets::tar_load(c("DF_lyrics_current_DICC", "DF_HITS_clean"))
 
   # WITH SONG AND ARTIST
   # 2025/09/26: 1700
-  DF_final_FOUND = DF_lyrics_current_CLEAN |>
+  DF_final_FOUND = DF_lyrics_current_DICC |>
     dplyr::inner_join(DF_HITS_clean,
                       by = dplyr::join_by(ID))
 

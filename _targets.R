@@ -13,7 +13,7 @@ check_placeholder_files()
 # Targets list
 list(
 
-  # Process NEW FILES --------------------------------------------------------
+  # Process NEW json FILES --------------------------------------------------
 
   # Input json files
   tar_files_input(lyrics_jsons, list.files("outputs/lyrics_to_process/", full.names = TRUE)),
@@ -46,9 +46,11 @@ list(
 
   tar_target(DF_HITS_raw, read_raw_hits(raw_HITS_spotify)),
   tar_target(DF_HITS_clean, clean_hits(DF_HITS_raw)),
-  tar_target(DF_lyrics_current_CLEAN, clean_lyrics_current(DF_lyrics_current)),
+  tar_target(DF_lyrics_current_DICC, create_lyrics_current_DICC(DF_lyrics_current)),
 
-  tar_target(DF_HITS_combined, combine_HITS_lyrics(DF_lyrics_current_CLEAN, DF_HITS_clean, DF_HITS_raw)),
+  tar_target(DF_HITS_matched, match_HITS_lyrics(DF_lyrics_current_DICC, DF_HITS_clean, DF_HITS_raw)),
+
+  tar_target(DF_lyrics_paragraphs_HITS, select_HITS(DF_HITS_matched, DF_lyrics_current, DF_paragraphs_current)),
 
 
 
@@ -70,6 +72,12 @@ list(
   # Clean up json files
   tar_target(MOVED_jsons, move_lyrics_to_processed(lyrics_jsons,
                                                    move_lyrics_file_to = "outputs/lyrics_processed/",
-                                                   DF_lyrics_updated))
+                                                   DF_lyrics_updated)),
+
+
+
+
+  # CHECKS ------------------------------------------------------------------
+  tar_target(CHECKS_result, CHECKS(DF_lyrics_current, DF_paragraphs_current, DF_lyrics_paragraphs_HITS))
 
 )

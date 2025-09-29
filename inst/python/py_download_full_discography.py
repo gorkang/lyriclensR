@@ -14,8 +14,10 @@ def py_download_full_discography(name_artist):
   print("Downloading: " + str(name_artist))
   # Other parameters
   # remove_section_headers=False # If `True`, removes [Chorus], [Bridge], etc. headers from lyrics.
+  # allow_name_change #Doesn't do anything, exists to maintain backwards compatibility.
   artist = genius.search_artist(name_artist, max_songs=3000, sort="popularity", get_full_info=True, include_features=True)
-  
+  # artist = genius.search_artist(artist_name="Malú", artist_id=453017, max_songs=3000, sort="popularity", get_full_info=True, include_features=True)
+
   # Create output name
   name_output = str("outputs/lyrics_to_process/") + str(name_artist) + " - " + str(artist.name) + "_" + str (artist.id) + "_" + str (artist.num_songs) + "_" + datetime.today().strftime('%Y-%m-%d') + ".json"
   

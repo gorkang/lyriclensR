@@ -66,7 +66,11 @@ read_all_lyrics <- function(lyrics_files, write_output = FALSE, filename_output 
   # Read in parallel with n daemons
   mirai::daemons(0)
   mirai::daemons(daemons)
-  DF_temp = lyrics_files |> purrr::map_df(purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics)) # If we add parameters, need to include parameter = parameter at the end
+  DF_temp = lyrics_files |>
+    purrr::map_df(
+      # If we add parameters, need to include parameter = parameter at the end
+      purrr::in_parallel(\(x) read_lyrics(x), read_lyrics = read_lyrics)
+      )
   mirai::daemons(0)
 
   # When language is set, check it exists, filter for that language, and change output name
@@ -497,18 +501,52 @@ create_clean_names <- function(dirty_names, eliminate_parenthesis = FALSE) {
 }
 
 
-proportion_found <- function(DF_HITS_clean, DF_HITS_raw, DF_HITS_combined_NOT_found) {
-  # targets::tar_load(c("DF_HITS_raw", "DF_HITS_clean"))
+proportion_found <- function(DF_HITS_clean, DF_HITS_raw, DF_HITS_matched_NOT_found) {
+  # targets::tar_load(c("DF_HITS_raw", "DF_HITS_clean", "DF_lyrics_current_DICC"))
 
   TOTAL_raw = DF_HITS_clean |> nrow()
   EXPLICIT_extra = DF_HITS_raw |> dplyr::filter(grepl("Explicit", source)) |> nrow()
   TOTAL_clean = TOTAL_raw - EXPLICIT_extra
-  NOT_found = DF_HITS_combined_NOT_found |> nrow()
+  NOT_found = DF_HITS_matched_NOT_found |> nrow()
   FOUND = TOTAL_clean - NOT_found
 
   DF = tibble::tibble(total_HITS = TOTAL_clean, found = FOUND, not_found = NOT_found) |>
-    dplyr::mutate(PCT_found = found/total_HITS)
+    dplyr::mutate(PCT_found = found/total_HITS,
+                  date = Sys.Date())
 
   print(DF)
+
+}
+
+
+
+select_HITS <- function(DF_HITS_matched, DF_lyrics_current, DF_paragraphs_current) {
+
+  # Dictionary with found HITS
+  DICC = DF_HITS_matched$DF_final_FOUND |>
+    dplyr::select(id, year.y)
+
+  # Select lyrics
+  DF_lyrics_HITS = DF_lyrics_current |>
+    dplyr::inner_join(DICC, by = dplyr::join_by(id)) |>
+    dplyr::mutate(
+      year = lubridate::year(release_date),
+      year =
+        dplyr::case_when(
+          is.na(year) ~ year.y,
+          TRUE ~ year
+        )) |>
+    dplyr::select(-year.y)
+
+  # Select paragraphs
+  DF_paragraphs_HITS = DF_paragraphs_current |>
+    dplyr::inner_join(DICC, by = dplyr::join_by(id))
+
+
+  DF_out = list(DF_lyrics_HITS = DF_lyrics_HITS,
+                DF_paragraphs_HITS = DF_paragraphs_HITS)
+
+
+  return(DF_out)
 
 }
