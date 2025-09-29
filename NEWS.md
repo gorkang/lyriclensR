@@ -1,3 +1,8 @@
+# lyriclensR 0.0.9
+
+* Output lyrics and paragraphs in the HIT list
+* Add checks
+
 # lyriclensR 0.0.8
 
 * Creating list of HITS
