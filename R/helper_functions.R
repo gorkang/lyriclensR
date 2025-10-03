@@ -464,14 +464,21 @@ parse_jsons_filenames <- function(jsons_filenames) {
 
 create_clean_names <- function(dirty_names, eliminate_parenthesis = FALSE) {
 
-  # dirty_names = "Que Nadie (E-Single)"
-  # We get rid of numbers. Too much?
+  # dirty_names = c("Que Nadie (E-Single)", "Living Wrong (feat. Glc & Nico Segal)",
+  #                 "Living Wrong (ft. Glc & Nico Segal)", "Living Wrong (feat. Glc & Nico Segal) (yes!)",
+  #                 "Mario Bautista ft. Brytiago", "Sympathy is a knife remix featuring berberich",
+  #                 "Featuring", "Not The News (Equiknoxx Remix Featuring Time Cow & Gavsborg)")
+  # Keep numbers!
+
+  # (with Justin Bieber)
+  # (con Jess Glynne)
 
   if (eliminate_parenthesis) {
     # This makes impossible to differentiate between x AND x (remix)
     dirty_names2 = gsub("\\s*\\([^\\)]+\\)", "", dirty_names)
   } else {
-    dirty_names2 = dirty_names
+    dirty_names1 = gsub("\\s*\\(\\s*?(?:feat\\.|feat|ft\\.|featuring)[^)]*\\)", "", dirty_names, ignore.case = TRUE)
+    dirty_names2 = gsub("(?<=\\S)\\s+(?:ft\\.|feat\\.|feat|featuring).*", "", dirty_names1, ignore.case = TRUE, perl = TRUE)
   }
 
   names_to_clean = dirty_names2 |> tolower() |> trimws() |>
@@ -520,17 +527,18 @@ proportion_found <- function(DF_HITS_clean, DF_HITS_raw, DF_HITS_matched_NOT_fou
 
 
 
-select_HITS <- function(DF_HITS_matched, DF_lyrics_current, DF_paragraphs_current) {
+select_HITS <- function(DF_HITS_matched, DF_lyrics_updated, DF_paragraphs_updated) {
+  # targets::tar_load("DF_paragraphs_updated")
 
   # Dictionary with found HITS
   DICC = DF_HITS_matched$DF_final_FOUND |>
     dplyr::select(id, year.y)
 
   # Select lyrics
-  DF_lyrics_HITS = DF_lyrics_current |>
+  DF_lyrics_HITS = DF_lyrics_updated |>
     dplyr::inner_join(DICC, by = dplyr::join_by(id)) |>
     dplyr::mutate(
-      year = lubridate::year(release_date),
+      # year = lubridate::year(release_date),
       year =
         dplyr::case_when(
           is.na(year) ~ year.y,
@@ -539,7 +547,7 @@ select_HITS <- function(DF_HITS_matched, DF_lyrics_current, DF_paragraphs_curren
     dplyr::select(-year.y)
 
   # Select paragraphs
-  DF_paragraphs_HITS = DF_paragraphs_current |>
+  DF_paragraphs_HITS = DF_paragraphs_updated |>
     dplyr::inner_join(DICC, by = dplyr::join_by(id))
 
 

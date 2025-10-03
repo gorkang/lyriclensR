@@ -1,5 +1,5 @@
 process_spotify_HITS <- function(HITS_files) {
-  # HITS_files = list.files("outputs/DF/", full.names = TRUE)
+  # targets::tar_load("HITS_files")
 
   # Listamos los archivos a leer
   # files <- list.files("outputs/DF", full.names = TRUE)

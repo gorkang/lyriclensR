@@ -5,7 +5,8 @@ clean_hits <- function(DF_HITS_raw) {
 
   DF_HITS_clean = DF_HITS_raw |>
     # Some margin for errors ( y , con , ...)
-    dplyr::mutate(artist = gsub("(.*?)([|/&]| y |, |feat.| con ).*", "\\1", artists, ignore.case = TRUE)) |>
+    # dplyr::mutate(artist = gsub("(.*?)([|/&]| y |, |feat.| con ).*", "\\1", artists, ignore.case = TRUE)) |>
+    dplyr::mutate(artist = gsub("(.*?)([|/&]| y |, |featuring|feat\\.|feat|ft\\.| con ).*", "\\1", artists, ignore.case = TRUE)) |>
 
     # Create unique ID
     dplyr::mutate(clean_songs = create_clean_names(song),

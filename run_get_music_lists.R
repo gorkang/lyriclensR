@@ -36,7 +36,7 @@ ALL_artists = ALL |>
   dplyr::mutate(
     id = paste0(number, "_", year),
     artist = gsub("[|/&]", ",", artist),
-    artist = gsub("featuring|feat\\.|feat|ft.", ", ", artist, ignore.case = TRUE),
+    artist = gsub("featuring|feat\\.|feat|ft\\.", ", ", artist, ignore.case = TRUE),
     artist = gsub(" y ", ", ", artist)) |>
   tidyr::separate_longer_delim(artist, ",") |>
   dplyr::mutate(artists = trimws(artist)) |>

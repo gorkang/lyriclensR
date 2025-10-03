@@ -2,16 +2,13 @@ match_HITS_lyrics <- function(DF_lyrics_current_DICC, DF_HITS_clean, DF_HITS_raw
 
   # targets::tar_load(c("DF_lyrics_current_DICC", "DF_HITS_clean"))
 
-  # WITH SONG AND ARTIST
-  # 2025/09/26: 1700
+
+  # Matching with SONG AND ARTIST
   DF_final_FOUND = DF_lyrics_current_DICC |>
     dplyr::inner_join(DF_HITS_clean,
                       by = dplyr::join_by(ID))
 
-
-
   # Not found
-  # 2025/09/26: 1729
   DF_final_NOT_FOUND = DF_HITS_clean |>
     dplyr::anti_join(DF_final_FOUND, by = dplyr::join_by(ID))
 

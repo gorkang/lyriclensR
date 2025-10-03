@@ -9,6 +9,9 @@
 #' @examples process_html("https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9")
 process_html <- function(spotify_list_URL, DEBUG = FALSE) {
 
+  # spotify_list_URL = "https://open.spotify.com/playlist/37i9dQZEVXbNFJfN1Vw8d9"
+  # FILES = "outputs/zips/2025-09-27_37i9dQZEVXbNFJfN1Vw8d9/outputs/www/2025-09-27 08:25:55 37i9dQZEVXbNFJfN1Vw8d9.html"
+
   # ERRORS:
   # Tyler, The Creator # Is an author. It gets changed to: c("Tyler", "The creator") # DICCIONARY with exceptions?
 
@@ -19,6 +22,7 @@ process_html <- function(spotify_list_URL, DEBUG = FALSE) {
                      full.names = TRUE)
 
   page_source_rvest <- rvest::read_html(FILES[1])
+
   CAT = page_source_rvest |>
     rvest::html_elements(xpath = paste0('/html/body/div[4]/div/div[2]/div[6]/div/div[2]/div[1]/div/main/section/div[2]/div[3]/div/div[1]/div')) |>
     rvest::html_text2(preserve_nbsp = TRUE)
@@ -75,7 +79,7 @@ process_html <- function(spotify_list_URL, DEBUG = FALSE) {
   # Compress html files to zip and delete individual files
   FILES_today = list.files(path = "outputs/www", pattern = paste0(Sys.Date()), full.names = TRUE)
   ALL_FILES = FILES_today[grepl(part_URL, FILES_today)]
-  zip(paste0("outputs/zips/", Sys.Date(), part_URL, ".zip"), ALL_FILES)
+  zip(paste0("outputs/zips/", Sys.Date(), "_", part_URL, ".zip"), ALL_FILES)
   file.remove(ALL_FILES)
 
   OUTPUT = list(

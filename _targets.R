@@ -40,20 +40,6 @@ list(
 
 
 
-  # HITS --------------------------------------------------------------------
-  tar_files_input(HITS_files, list.files("outputs/DF/", full.names = TRUE)),
-  tar_target(raw_HITS_spotify, process_spotify_HITS(HITS_files)),
-
-  tar_target(DF_HITS_raw, read_raw_hits(raw_HITS_spotify)),
-  tar_target(DF_HITS_clean, clean_hits(DF_HITS_raw)),
-  tar_target(DF_lyrics_current_DICC, create_lyrics_current_DICC(DF_lyrics_current)),
-
-  tar_target(DF_HITS_matched, match_HITS_lyrics(DF_lyrics_current_DICC, DF_HITS_clean, DF_HITS_raw)),
-
-  tar_target(DF_lyrics_paragraphs_HITS, select_HITS(DF_HITS_matched, DF_lyrics_current, DF_paragraphs_current)),
-
-
-
   # UPDATE ------------------------------------------------------------------
 
   # Update main lyrics file if there are new lyrics
@@ -72,12 +58,32 @@ list(
   # Clean up json files
   tar_target(MOVED_jsons, move_lyrics_to_processed(lyrics_jsons,
                                                    move_lyrics_file_to = "outputs/lyrics_processed/",
-                                                   DF_lyrics_updated)),
+                                                   DF_lyrics_new)),
 
 
 
+  # CLEAN -------------------------------------------------------------------
+
+  tar_target(DF_lyrics_clean, lyrics_clean(DF_lyrics_updated)),
+
+
+
+  # HITS --------------------------------------------------------------------
+  tar_files_input(HITS_files, list.files("outputs/DF/", full.names = TRUE)),
+  tar_target(raw_HITS_spotify, process_spotify_HITS(HITS_files)),
+
+  tar_target(DF_HITS_raw, read_raw_hits(raw_HITS_spotify)),
+  tar_target(DF_HITS_clean, clean_hits(DF_HITS_raw)),
+  tar_target(DF_lyrics_DICC, create_lyrics_DICC(DF_lyrics_clean)),
+
+  tar_target(DF_HITS_matched, match_HITS_lyrics(DF_lyrics_DICC, DF_HITS_clean, DF_HITS_raw)),
+
+  tar_target(DF_lyrics_paragraphs_HITS, select_HITS(DF_HITS_matched, DF_lyrics_clean, DF_paragraphs_updated)),
+
+
+  tar_target(save_CS, make_CS(DF_lyrics_paragraphs_HITS, DF_lyrics_updated, DF_paragraphs_updated)),
 
   # CHECKS ------------------------------------------------------------------
-  tar_target(CHECKS_result, CHECKS(DF_lyrics_current, DF_paragraphs_current, DF_lyrics_paragraphs_HITS))
+  tar_target(CHECKS_result, CHECKS(DF_lyrics_updated, DF_paragraphs_updated, DF_lyrics_paragraphs_HITS))
 
 )

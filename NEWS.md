@@ -1,3 +1,9 @@
+# lyriclensR 0.0.10
+
+* Create final DF with lyrics and paragraphs for HITS
+* improve cleaning artists, and songs
+* restructuring and fix small bugs
+
 # lyriclensR 0.0.9
 
 * Output lyrics and paragraphs in the HIT list
