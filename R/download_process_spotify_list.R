@@ -39,7 +39,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
     download_all_artists(artists = c(Artistas_clean))
   } else {
     # OR download all!
-    download_all_artists(artists = c(OUT$ARTISTAS))
+    download_all_artists(artists = c(OUT$ARTISTS))
   }
 
 

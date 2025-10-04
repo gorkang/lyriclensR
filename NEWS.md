@@ -1,3 +1,8 @@
+# lyriclensR 0.0.11
+
+* Much better system in process_html. Very clean, can separate authors.
+* Make download_spotify_list more robust
+
 # lyriclensR 0.0.10
 
 * Create final DF with lyrics and paragraphs for HITS

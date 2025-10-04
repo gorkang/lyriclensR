@@ -63,25 +63,33 @@ def py_download_spotify_list(spotify_list_URL):
   
   # Open web
   driver.get(spotify_list_URL)
+  time.sleep(2)
 
   # Wait 60 secs or until element is present
   timeout = 60
-  element_present = EC.presence_of_element_located((By.XPATH, '//*[@id="onetrust-accept-btn-handler"]'))
-  WebDriverWait(driver, timeout).until(element_present)
-
+  
   # Accept cookies message
-  cookies = driver.find_element(By.XPATH, '//*[@id="onetrust-accept-btn-handler"]')
+  Element = '//*[@id="onetrust-accept-btn-handler"]'
+  element_present = EC.presence_of_element_located((By.XPATH, Element))
+  WebDriverWait(driver, timeout).until(element_present)
+  cookies = driver.find_element(By.XPATH, Element)
   cookies.click()
   
   # Select compact mode so the E (in explicit songs) wont bleed into the Artist column
   
+  
   # Open List menu
   Element = '//*[@id="main-view"]/div/div[2]/div[1]/div/main/section/div[2]/div[2]/div[1]/div/div/div[2]/button'
+  element_present = EC.presence_of_element_located((By.XPATH, Element))
+  WebDriverWait(driver, timeout).until(element_present)
   LIST = driver.find_element(By.XPATH, Element)
   LIST.click()
   
   # Click on button named Compact
-  COMPACT = driver.find_element(By.XPATH, '//*[text() = "Compact"]')
+  Element = '//*[text() = "Compact"]'
+  element_present = EC.presence_of_element_located((By.XPATH, Element))
+  WebDriverWait(driver, timeout).until(element_present)
+  COMPACT = driver.find_element(By.XPATH, Element)
   COMPACT.click()  
 
   # This changes often, and send keys does not work :(

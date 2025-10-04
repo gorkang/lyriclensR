@@ -11,16 +11,20 @@
 #' @examples download_individual_songs(processed_spotify_list)
 download_individual_songs <- function(processed_spotify_list, min_s_wait = 5, max_s_wait = 10) {
 
-  DF_canciones = processed_spotify_list$DF_output
+  DF_songs =
+    processed_spotify_list$DF_output |>
+    # Only first artist
+    dplyr::mutate(artist = gsub("(.*?) \\|\\| .*", "\\1", artist))
 
-  1:nrow(DF_canciones) |>
+
+  1:nrow(DF_songs) |>
     purrr::walk(~{
 
-      cli::cli_alert_info("{.x}/{nrow(DF_canciones)}")
+      cli::cli_alert_info("{.x}/{nrow(DF_songs)}")
 
       OUT = download_song_safely(
-        name_artist = DF_canciones$Artista[.x],
-        name_song = DF_canciones$Cancion[.x],
+        name_artist = DF_songs$artist[.x],
+        name_song = DF_songs$song[.x],
         min_s_wait = 5, max_s_wait = 10
       )
 
