@@ -445,7 +445,7 @@ check_placeholder_files <- function() {
 
   if (!file.exists("outputs/lyrics_to_process/README")) file.create("outputs/lyrics_to_process/README")
   if (!file.exists("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")) file.create("outputs/DF_lyrics/DF_lyrics_ALL.placeholder")
-  if (!file.exists("outputs/DF_paragraphs/DF_paragraphs_ALL.placeholder")) file.create("outputs/DF_paragraphs/DF_paragraph_ALL.placeholder")
+  if (!file.exists("outputs/DF_paragraphs/DF_paragraphs_ALL.placeholder")) file.create("outputs/DF_paragraphs/DF_paragraphs_ALL.placeholder")
 
   return("All placeholder files in place")
 
