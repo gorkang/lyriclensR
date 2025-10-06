@@ -69,7 +69,7 @@ list(
 
 
   # HITS --------------------------------------------------------------------
-  tar_files_input(HITS_files, list.files("outputs/DF/", full.names = TRUE)),
+  tar_files_input(HITS_files, list.files("outputs/DF/", full.names = TRUE, recursive = TRUE)),
   tar_target(raw_HITS_spotify, process_spotify_HITS(HITS_files)),
 
   tar_target(DF_HITS_raw, read_raw_hits(raw_HITS_spotify)),
