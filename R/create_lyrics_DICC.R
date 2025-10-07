@@ -3,6 +3,8 @@ create_lyrics_DICC <- function(DF_lyrics_clean) {
   # targets::tar_load("DF_lyrics_clean")
   # targets::tar_load_globals()
 
+  if (is.null(DF_lyrics_clean)) return(NULL)
+
   DF_lyrics_DICC = DF_lyrics_clean |>
 
     # TODO: Should this be done when reading the file?

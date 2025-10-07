@@ -2,6 +2,7 @@ match_HITS_lyrics <- function(DF_lyrics_current_DICC, DF_HITS_clean, DF_HITS_raw
 
   # targets::tar_load(c("DF_lyrics_current_DICC", "DF_HITS_clean"))
 
+  if (is.null(DF_lyrics_current_DICC)) return(NULL)
 
   # Matching with SONG AND ARTIST
   DF_final_FOUND = DF_lyrics_current_DICC |>

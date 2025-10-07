@@ -28,6 +28,8 @@ targets::tar_make()
 # targets::tar_load_everything()
 targets::tar_load("DF_lyrics_current")
 targets::tar_load("DF_lyrics_new")
+targets::tar_load("DF_lyrics_updated")
+targets::tar_load("DF_lyrics_clean")
 
 targets::tar_load("DF_HITS_matched")
 targets::tar_load("DF_HITS_raw")

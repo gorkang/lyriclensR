@@ -9,7 +9,7 @@ read_raw_hits <- function(raw_HITS_spotify) {
     dplyr::select(year, song, artists, source)
 
   # Original paper
-  LAURA = readr::read_csv("admin/DOING/laura_original_list_Hits/complete_dataset_information_songs.csv",
+  LAURA = readr::read_csv("outputs/song_lists/TFG_complete_dataset_information_songs.csv",
                           show_col_types = FALSE) |>
     dplyr::rename(
       year = `Hit Year`,

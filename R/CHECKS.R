@@ -12,6 +12,7 @@ CHECKS <- function(DF_lyrics, DF_paragraphs, DF_lyrics_paragraphs_HITS, low_char
   # nrow(DF_paragraphs_current)
   # DF_paragraphs = DF_paragraphs_current
 
+  if (any(is.null(c(DF_lyrics, DF_paragraphs, DF_lyrics_paragraphs_HITS)))) return(NULL)
 
 # json_files --------------------------------------------------------------
 
