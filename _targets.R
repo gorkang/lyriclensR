@@ -29,12 +29,10 @@ list(
   # CURRENT FILES -----------------------------------------------------------
 
   # Main processed lyrics file
-  # REVIEW: This way of getting filename_current_lyrics is a bit flimsy
   tar_files_input(filename_current_lyrics, list.files("outputs/DF_lyrics/", pattern = "DF_lyrics_ALL\\.", full.names = TRUE)),
   tar_target(DF_lyrics_current, read_DF_ALL(filename_current = filename_current_lyrics, what = "lyrics")),
 
   # Main processed paragraphs file
-  # REVIEW: This way of getting filename_current_paragraphs is a bit flimsy
   tar_files_input(filename_current_paragraphs, list.files("outputs/DF_paragraphs/", pattern = "DF_paragraphs_ALL\\.", full.names = TRUE)),
   tar_target(DF_paragraphs_current, read_DF_ALL(filename_current = filename_current_paragraphs, what = "paragraphs")),
 

@@ -1,6 +1,8 @@
 CHECKS <- function(DF_lyrics, DF_paragraphs, DF_lyrics_paragraphs_HITS, low_chars = 1, high_chars = 1000) {
 
-  # targets::tar_load("DF_lyrics_paragraphs_HITS")
+  # targets::tar_load_globals()
+
+  # targets::tar_load(c("DF_lyrics_paragraphs_HITS", "DF_lyrics", "DF_paragraphs"))
   # DF_lyrics_paragraphs_HITS$DF_lyrics_HITS
   # DF_lyrics_paragraphs_HITS$DF_paragraphs_HITS
 
@@ -9,6 +11,17 @@ CHECKS <- function(DF_lyrics, DF_paragraphs, DF_lyrics_paragraphs_HITS, low_char
   # nrow(DF_lyrics_current)
   # nrow(DF_paragraphs_current)
   # DF_paragraphs = DF_paragraphs_current
+
+
+# json_files --------------------------------------------------------------
+
+  cli::cli_h1("CHECKS search/found (jsons)")
+
+  DIFFs = suppressWarnings(compare_searched_vs_found_jsons())
+  DIFFs_table = DIFFs |> dplyr::count(DIFF_artist, DIFF_parcial_artist, DIFF_distance_artist)
+  print(knitr::kable(DIFFs_table))
+
+  # Paragraphs --------------------------------------------------------------
 
   DF_paragraphs_chars = DF_paragraphs |>
     dplyr::mutate(n_char = nchar(paragraph)) |>

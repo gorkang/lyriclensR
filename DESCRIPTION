@@ -25,6 +25,7 @@ Imports:
     remotes,
     reticulate,
     rvest,
+    spotifyr,
     stringi,
     stringr,
     tibble,

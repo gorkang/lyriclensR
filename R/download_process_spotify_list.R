@@ -6,6 +6,8 @@
 #' @param continue_after_error Will dowload authors not in the main folder
 #' @param end_message Send message using {ntfy}
 #'
+#' @importFrom cli cli_h1
+#' @importFrom dplyr filter mutate pull tibble
 #' @returns A DF with the full processed data
 #' @export
 #'
@@ -19,7 +21,7 @@ download_process_spotify_list <- function(spotify_list_URL, only_new = FALSE, co
 
   # 2) List not already downloaded artists
   cli::cli_h1("Filtering artists")
-  LastFile = tibble::tibble(filename = list.files("outputs/DF/", full.names = TRUE)) |>
+  LastFile = dplyr::tibble(filename = list.files("outputs/DF/", full.names = TRUE)) |>
     dplyr::mutate(ctime = file.info(filename, extra_cols = TRUE)$ctime) |>
     dplyr::filter(ctime == max(ctime)) |> dplyr::pull(filename)
 
