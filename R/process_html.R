@@ -1,4 +1,4 @@
-process_html <- function(spotify_list_URL, location_html = "outputs/www/") {
+process_html <- function(spotify_list_URL, location_html = "outputs/www/", keep_only_new = TRUE) {
 
   # spotify_list_URL = "https://open.spotify.com/playlist/37i9dQZEVXbMDoHDwVN2tF"
   # FILES = "outputs/zips/2025-09-27_37i9dQZEVXbNFJfN1Vw8d9/outputs/www/2025-09-27 08:25:55 37i9dQZEVXbNFJfN1Vw8d9.html"
@@ -58,6 +58,29 @@ process_html <- function(spotify_list_URL, location_html = "outputs/www/") {
     dplyr::distinct(artist) |>
     dplyr::arrange(artist) |>
     dplyr::pull(artist)
+
+
+
+
+  if (keep_only_new) {
+
+    DF_have = seq_along(DF_output$song) |>
+      purrr::map_df(
+        ~{
+
+          song_is_in_lyrics(song = DF_output$song[.x], artist = DF_output$artist[.x])
+        })
+
+    DF_output =
+      DF_output |> dplyr::anti_join(DF_have, by = dplyr::join_by(song))
+
+    ARTISTS = ARTISTS[!ARTISTS %in% DF_have$artist]
+  }
+
+
+
+
+
 
 
   # Save DF

@@ -59,7 +59,7 @@ get_and_process_spotify_list <- function(spotify_list_URL) {
   reticulate::source_python(system.file("python", "py_download_spotify_list.py", package = "lyriclensR"))
   py_download_spotify_list(spotify_list_URL)
 
-  DF = process_html(spotify_list_URL)
+  DF = process_html(spotify_list_URL, keep_only_new = TRUE)
 
   return(DF)
 }

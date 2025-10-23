@@ -1,3 +1,7 @@
+# lyriclensR 0.0.12
+
+- Add `keep_only_new` parameter in `process_html()` so we only download new songs.
+
 # lyriclensR 0.0.11
 
 * Much better system in process_html. Very clean, can separate authors.

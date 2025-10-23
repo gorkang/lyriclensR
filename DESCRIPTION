@@ -1,6 +1,6 @@
 Package: lyriclensR
 Title: Functions to Work With Lyrics
-Version: 0.0.11
+Version: 0.0.12
 Authors@R: 
     person("Gorka", "Navarrete", , "gorkang@gmail.com", role = c("aut", "cre"))
 Description: Helps get lyrics, separate words, plot wordclouds, etc.

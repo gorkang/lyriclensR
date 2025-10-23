@@ -261,16 +261,17 @@ download_all_artists <- function(artists, min_s_wait = 5, max_s_wait = 20, messa
 
 
 
-song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics_ALL.gz") {
+song_is_in_lyrics <- function(song, artist, filename = "outputs/DF_lyrics/DF_lyrics_ALL.gz") {
 
-  # name_song = "amor"
+  # song = DF_output$song[2]
+  # artist = DF_output$artist[2]
 
   filename = here::here(filename)
   DF_ALL = data.table::fread(filename)
 
   # Fuzzy matching
-  FOUND = agrep(
-    name_song,
+  FOUND_song = agrep(
+    song,
     DF_ALL$title,
     max.distance = 0.1,
     value = TRUE,
@@ -280,9 +281,22 @@ song_is_in_lyrics <- function(name_song, filename = "outputs/DF_lyrics/DF_lyrics
                  deletions = .5,
                  substitutions = 0))
 
+  # Fuzzy matching
+  artist_clean = gsub("^(.*?) \\|\\| .*", "\\1", artist)
+  FOUND_artist = agrep(
+    artist_clean,
+    DF_ALL$artist,
+    max.distance = 0.1,
+    value = TRUE,
+    ignore.case = TRUE,
+    fixed = TRUE,
+    costs = list(insertions = 0.2,
+                 deletions = .5,
+                 substitutions = 0))
   # Search for song in DF
-  DF_out = DF_ALL[title %in% FOUND] |>
-    dplyr::select(id, artists, title)
+  DF_out = DF_ALL[title %in% FOUND_song & artist %in% FOUND_artist] |>
+    dplyr::select(id, title, artist, artists) |>
+    dplyr::rename(song = title)
 
   return(DF_out)
 
